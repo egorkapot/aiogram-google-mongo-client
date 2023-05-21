@@ -1,55 +1,36 @@
-import telebot
-from telebot import types
-from google.oauth2 import service_account
-from googleapiclient import discovery, errors
-import base64
-from email.mime.text import MIMEText
 import os
-# bot.polling(none_stop=True, interval=0)
+import telebot
+from dotenv import load_dotenv
+from telebot import types
+from emails.emails import get_emails_list
 
-bot_token = os.environ.get('BOT_TOKEN')
+load_dotenv()
+
+
+bot_token = os.environ.get("BOT_TOKEN")
 bot = telebot.TeleBot(bot_token)
+list_of_emails = get_emails_list()
 
-@bot.message_handler(commands=['start'])
+
+@bot.message_handler(commands=["start"])
 def start(message):
-    markup = types.ReplyKeyboardMarkup()
-    name_1 = types.KeyboardButton('Андрюха')
-    name_2 = types.KeyboardButton('Егор')
-    markup.add(name_1, name_2)
-    bot.send_message(message.from_user.id, 'Choose your fighter', reply_markup=markup)
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    open_access = types.KeyboardButton("Открыть доступ")
+    link_to_table = types.KeyboardButton("Ссылка на рабочую таблицу")
+    link_to_guide = types.KeyboardButton("Ссылка на гайд")
+    markup.add(open_access, link_to_table, link_to_guide)
+    bot.send_message(message.from_user.id, "Выбери что тебе нужно", reply_markup=markup)
 
 
-
-@bot.message_handler(content_types=['text'])
-def choose_fighter(message):
-    if message.text == 'Андрюха':
-        bot.send_message('Едет в Варшаву')
-    elif message.text == 'Егор':
-        bot.send_message('Тоже гонит в Варшаву')
-    else:
-        bot.send_message('Fighter was not chosen')
-
-# @staticmethod
-# @bot.message_handler(content_types=['text'])
-# def start(self, message):
-#     # self.button_message(message)
-#     if message.text == 'start' or message.text == '/start{}'.format(bot_token):
-#         bot.send_message(message.chat.id, 'Please click on a button to start', reply_markup=self.markup)
-#     else:
-#         bot.send_message(message.chat.id, 'Some issues', reply_markup=self.markup)
-
-# @bot.message_handler(content_types='text')
-# def message_reply(self, message):
-#     if message.text=='Start':
-#         bot.send_message(message.chat.id, 'Session has been started')
-#     else:
-#         bot.send_message('No start button defined')
+@bot.message_handler(content_types=["text"])
+def message_handling(message):
+    if message.text == "Открыть доступ":
+        bot.send_message(message.from_user.id, "Not implemented yet")
+    elif message.text == "Ссылка на рабочую таблицу":
+        bot.send_message(message.from_user.id, os.environ.get("TABLE_LINK"))
+    elif message.text == "Ссылка на гайд":
+        bot.send_message(message.from_user.id, os.environ.get("GUIDE_LINK"))
 
 
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     bot.infinity_polling()
-
-
-

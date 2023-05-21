@@ -1,20 +1,23 @@
-[tool.poetry]
-name = "tg-bot"
-version = "0.1.0"
-description = ""
-authors = ["egorkapot <makaroffglobal@icloud.com>"]
-readme = "README.md"
-packages = [{include = "tg_bot"}]
+[tool.black]
+exclude = '''
+(
+/(
+    \.git
+  | \.venv
+  | \.eggs
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | tg_bot
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+| \.direnv
+)
+'''
 
-[tool.poetry.dependencies]
-python = "^3.10"
-telegram = "^0.0.1"
-telebot = "^0.0.5"
-google = "^3.0.0"
-google-auth-httplib2 = "^0.1.0"
-google-api-python-client = "^2.83.0"
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.isort]
+skip = ".venv, tg_bot"
