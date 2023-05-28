@@ -4,9 +4,9 @@ import telebot
 from dotenv import load_dotenv
 from telebot import types
 
-from credentials.client import Client
-from emails.emails import get_emails_list
-from utils.utils import is_valid_link
+from google_access_share_bot.credentials.client import Client
+from google_access_share_bot.emails.emails import get_emails_list
+from google_access_share_bot.utils.utils import is_valid_link
 
 load_dotenv()
 bot_token = os.environ.get("BOT_TOKEN")
