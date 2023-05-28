@@ -9,7 +9,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from google_access_share_bot.bot_logging import BotLoggingHandler
+#TODO think about changing the import
+from ..bot_logging import BotLoggingHandler
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/drive"]
