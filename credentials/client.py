@@ -1,5 +1,5 @@
 from __future__ import print_function
-
+from google_access_share_bot.utils.utils import generate_id
 import logging
 import os.path
 
@@ -12,7 +12,7 @@ from googleapiclient.errors import HttpError
 from google_access_share_bot.bot_logging.bot_logging import BotLoggingHandler
 
 # If modifying these scopes, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/drive"]
+SCOPES = ["https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
 
 
 class Client:
@@ -21,12 +21,13 @@ class Client:
         self.chat_id = chat_id
         self.logger = logging.getLogger("client")
         self.setup_logger()
-        self.client = self.get_client()
+        self.drive_client, self.sheets_client = self.get_client()
 
     def setup_logger(self):
         handler = BotLoggingHandler(self.bot, self.chat_id)
         formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            "%(asctime)s - %(levelname)s - %(message)s",
+            datefmt="%y-%m-%d"
         )
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
@@ -54,22 +55,23 @@ class Client:
             with open("credentials/token.json", "w") as token:
                 token.write(creds.to_json())
         try:
-            service = build("drive", "v3", credentials=creds)
-            return service
+            drive_service = build("drive", "v3", credentials=creds)
+            sheets_service = build("sheets", "v4", credentials=creds)
+            return drive_service, sheets_service
         except HttpError as error:
             self.logger.error(f"An error occurred: {error}")
             raise error
 
-    def share_document(self, link, email):
+    def share_access(self, link, email):
         user_permission = {"type": "user", "role": "writer", "emailAddress": email}
-        command = self.client.permissions().create(
+        file_id = generate_id(link)
+        command = self.drive_client.permissions().create(
             fileId=file_id,
             body=user_permission,
             fields="id",
         )
-
         try:
             command.execute()
-            self.logger.info(f"Sharing the access to {email}")
+            self.logger.info(f"Sharing the {link} to {email}")
         except Exception as e:
-            self.logger.error(f"Error sharing {file_id} access with {email}: {e}")
+            self.logger.error(f"Error sharing {link} access with {email}: {e}")

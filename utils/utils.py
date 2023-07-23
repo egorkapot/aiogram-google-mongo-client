@@ -2,7 +2,7 @@ import re
 
 
 def is_google_document(link):
-    """Validates that the link is document"""
+    """Validates that the link is a document"""
     pattern = r"(https://docs.google.com/document/d/)([a-zA-Z0-9-_]+)"
     return bool(re.match(pattern, link))
 
@@ -20,13 +20,3 @@ def generate_id(link):
     if match:
         file_id = match.group(2)
         return file_id
-
-
-
-
-
-def validate_admin(user_id, admin_chat_id):
-    if user_id in admin_chat_id:
-        return True
-    else:
-        return None

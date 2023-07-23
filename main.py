@@ -32,13 +32,28 @@ def start(message):
     markup.row(open_access)
     bot.send_message(message.from_user.id, "Choose what you need", reply_markup=markup)
 
-@bot.message_handler(commands=["clean table"]) #TODO not sure if can skip underscore in naming
-def clean_working_table(message, table_id):
+@bot.message_handler(commands=["cleantable"])
+def clean_working_table(message):
     user_id = message.from_user.id
-    if validate_admin(user_id, admin_chat_id):
-        #TODO todo
+    if user_id in admin_chat_id:
+        send_message_to_user(user_id, "Authenticated, now provide link to table")
     else:
-        client.logger.error("You are not the admin :)")
+        send_message_to_user(user_id, "You are not the admin")
+        client.logger.error(f"{user_id} tried to access cleantable")
+
+@bot.message_handler(commands=['me'])
+def me_command(message):
+    """Get user information"""
+    user_id = message.from_user.id
+    first_name = message.from_user.first_name
+    last_name = message.from_user.last_name
+    username = message.from_user.username
+    # Construct the message to send back to the user
+    response = f"User ID: {user_id}\n"
+    response += f"First Name: {first_name}\n"
+    response += f"Last Name: {last_name}\n"
+    response += f"Username: @{username}"
+    send_message_to_user(user_id, response)
 
 
 @bot.message_handler(func=lambda message: message.text == 'Working Table')
@@ -46,58 +61,19 @@ def send_link_to_working_table(message):
     user_id = message.from_user.id
     send_message_to_user(user_id, os.environ.get("TABLE_LINK"))
 
+
 @bot.message_handler(func=lambda message: message.text == 'Link to Guide')
 def send_link_to_guide(message):
     user_id = message.from_user.id
     send_message_to_user(user_id, os.environ.get("GUIDE_LINK"))
 
-@bot.message_handler(func=lambda message: message.text == 'Open the access')
-def open_access(message):
-    user_id = message.from_user.id
-    if 1:
-        pass
-    else:
-        send_message_to_user(user_id, "Sorry I cant handle your request")
-
-
-def handle_access_request(user_id, message):
-    """If user status is awaiting email - """
-    if user_data[user_id]["state"] == "awaiting_email":
-        handle_email(user_id, message)
-    elif user_data[user_id]["state"] == "awaiting_link":
-        handle_link(user_id, message)
-    else:
-        client.logger.error("Unable to define state of the user")
-
-
-def initiate_access_request(user_id):
-    """Creates a dictionary for each user and sends an incoming message to provide an email"""
-    user_data[user_id] = {
-        "state": "awaiting_email",
-        "email": None,
-        "link": None,
-    }
-    send_message_to_user(user_id, "Provide your email")
-
-
-def handle_email(user_id, email):
-    if email in list_of_emails:
-        user_data[user_id]["email"] = email
-        user_data[user_id]["state"] = "awaiting_link"
-        send_message_to_user(user_id, "Now provide the link to the document")
-    else:
-        send_message_to_user(user_id, "Incorrect email, please try again")
-
-
-def handle_link(user_id, link):
-    file_id = is_google_document(link)
-    if file_id:
-        send_message_to_user(user_id, "Access will be opened shortly")
-        email = user_data[user_id].get("email")
-        client.share_document(file_id, email)
-        del user_data[user_id]
-    else:
-        send_message_to_user(user_id, "Invalid link, please try again")
+# @bot.message_handler(func=lambda message: message.text == 'Open the access')
+# def open_access(message):
+#     user_id = message.from_user.id
+#     if user_id:
+#         pass
+#     else:
+#         send_message_to_user(user_id, "Sorry I cant handle your request")
 
 
 if __name__ == "__main__":
