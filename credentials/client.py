@@ -60,7 +60,7 @@ class Client:
             self.logger.error(f"An error occurred: {error}")
             raise error
 
-    def share_document(self, file_id, email):
+    def share_document(self, link, email):
         user_permission = {"type": "user", "role": "writer", "emailAddress": email}
         command = self.client.permissions().create(
             fileId=file_id,

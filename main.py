@@ -6,18 +6,19 @@ from telebot import types
 
 from google_access_share_bot.credentials.client import Client
 from google_access_share_bot.emails.emails import get_emails_list
-from google_access_share_bot.utils.utils import is_valid_link
+from google_access_share_bot.utils.utils import is_google_document, is_google_spreadsheet, validate_admin
 
 load_dotenv()
-bot_token = os.environ.get("BOT_TOKEN")
-author_chat_id = os.environ.get("AUTHOR_CHAT_ID")
+bot_token = os.environ.get("DEVELOPMENT_BOT_TOKEN")
+admin_chat_id = os.environ.get("ADMIN_CHAT_ID").split(',')
 bot = telebot.TeleBot(bot_token)
 list_of_emails = get_emails_list()
 user_data = {}
-client = Client(bot, author_chat_id)
+client = Client(bot, admin_chat_id)
 
 
 def send_message_to_user(user_id, message):
+    """Sends message to specific user"""
     bot.send_message(user_id, message)
 
 
@@ -31,23 +32,36 @@ def start(message):
     markup.row(open_access)
     bot.send_message(message.from_user.id, "Choose what you need", reply_markup=markup)
 
-
-@bot.message_handler(content_types=["text"])
-def message_handling(message):
+@bot.message_handler(commands=["clean table"]) #TODO not sure if can skip underscore in naming
+def clean_working_table(message, table_id):
     user_id = message.from_user.id
-    if message.text == "Open the access":
-        initiate_access_request(user_id)
-    elif message.text == "Working Table":
-        send_message_to_user(user_id, os.environ.get("TABLE_LINK"))
-    elif message.text == "Link to Guide":
-        send_message_to_user(user_id, os.environ.get("GUIDE_LINK"))
-    elif user_id in user_data:
-        handle_access_request(user_id, message.text)
+    if validate_admin(user_id, admin_chat_id):
+        #TODO todo
+    else:
+        client.logger.error("You are not the admin :)")
+
+
+@bot.message_handler(func=lambda message: message.text == 'Working Table')
+def send_link_to_working_table(message):
+    user_id = message.from_user.id
+    send_message_to_user(user_id, os.environ.get("TABLE_LINK"))
+
+@bot.message_handler(func=lambda message: message.text == 'Link to Guide')
+def send_link_to_guide(message):
+    user_id = message.from_user.id
+    send_message_to_user(user_id, os.environ.get("GUIDE_LINK"))
+
+@bot.message_handler(func=lambda message: message.text == 'Open the access')
+def open_access(message):
+    user_id = message.from_user.id
+    if 1:
+        pass
     else:
         send_message_to_user(user_id, "Sorry I cant handle your request")
 
 
 def handle_access_request(user_id, message):
+    """If user status is awaiting email - """
     if user_data[user_id]["state"] == "awaiting_email":
         handle_email(user_id, message)
     elif user_data[user_id]["state"] == "awaiting_link":
@@ -57,6 +71,7 @@ def handle_access_request(user_id, message):
 
 
 def initiate_access_request(user_id):
+    """Creates a dictionary for each user and sends an incoming message to provide an email"""
     user_data[user_id] = {
         "state": "awaiting_email",
         "email": None,
@@ -75,7 +90,7 @@ def handle_email(user_id, email):
 
 
 def handle_link(user_id, link):
-    file_id = is_valid_link(link)
+    file_id = is_google_document(link)
     if file_id:
         send_message_to_user(user_id, "Access will be opened shortly")
         email = user_data[user_id].get("email")
