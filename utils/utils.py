@@ -20,3 +20,14 @@ def generate_id(link):
     if match:
         file_id = match.group(2)
         return file_id
+
+
+def get_grid_range(sheet_id, start_row, end_row, start_col, end_col):
+    """Returns a GridRange object for batch updates."""
+    return {
+        "sheetId": sheet_id,
+        "startRowIndex": start_row,
+        "endRowIndex": end_row,
+        "startColumnIndex": start_col,
+        "endColumnIndex": end_col,
+    }

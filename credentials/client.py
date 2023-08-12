@@ -1,5 +1,10 @@
 from __future__ import print_function
-from google_access_share_bot.utils.utils import generate_id
+from google_access_share_bot.utils.utils import (
+    generate_id,
+    is_google_spreadsheet,
+    is_google_document,
+    get_grid_range,
+)
 import logging
 import os.path
 
@@ -12,7 +17,10 @@ from googleapiclient.errors import HttpError
 from google_access_share_bot.bot_logging.bot_logging import BotLoggingHandler
 
 # If modifying these scopes, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+SCOPES = [
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/spreadsheets",
+]
 
 
 class Client:
@@ -26,8 +34,7 @@ class Client:
     def setup_logger(self):
         handler = BotLoggingHandler(self.bot, self.chat_id)
         formatter = logging.Formatter(
-            "%(asctime)s - %(levelname)s - %(message)s",
-            datefmt="%y-%m-%d"
+            "%(asctime)s - %(levelname)s - %(message)s", datefmt="%y-%m-%d"
         )
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
@@ -63,6 +70,7 @@ class Client:
             raise error
 
     def share_access(self, link, email):
+        """Generates the id of the document and gives the permissions to provided email"""
         user_permission = {"type": "user", "role": "writer", "emailAddress": email}
         file_id = generate_id(link)
         command = self.drive_client.permissions().create(
@@ -75,3 +83,58 @@ class Client:
             self.logger.info(f"Sharing the {link} to {email}")
         except Exception as e:
             self.logger.error(f"Error sharing {link} access with {email}: {e}")
+
+    def clean_spreadsheet(self, link):
+        """
+        Receives spreadsheet object using drive client.
+        For each sheet of spreadsheet cleans the range in updateCells and highlights in white in repeatCell.
+        All these updates are stored in requests list and send to batchUpdate function to execute at once
+        """
+        spreadsheet_id = generate_id(link)
+        spreadsheet = (
+            self.sheets_client.spreadsheets()
+            .get(spreadsheetId=spreadsheet_id)
+            .execute()
+        )
+        requests = []
+        for sheet in spreadsheet["sheets"]:
+            sheet_name = sheet.get("properties", {}).get("title")
+            sheet_id = sheet.get("properties", {}).get("sheetId")
+            # TODO take list names to exclude from .env
+            if sheet_name.lower() in ["Tasks", "Косяки", "инфа об авторах"]:
+                continue
+
+            requests.append(
+                {
+                    "updateCells": {
+                        "range": get_grid_range(sheet_id, 1, 1000, 3, 26),
+                        "fields": "userEnteredValue",
+                    }
+                }
+            )
+
+            requests.append(
+                {
+                    "repeatCell": {
+                        "range": get_grid_range(sheet_id, 1, 1000, 0, 26),
+                        "cell": {
+                            "userEnteredFormat": {
+                                "backgroundColor": {
+                                    "red": 1.0,
+                                    "green": 1.0,
+                                    "blue": 1.0,
+                                }
+                            }
+                        },
+                        "fields": "userEnteredFormat(backgroundColor)",
+                    }
+                }
+            )
+        if requests:
+            body = {"requests": requests}
+            response = (
+                self.sheets_client.spreadsheets()
+                .batchUpdate(spreadsheetId=spreadsheet_id, body=body)
+                .execute()
+            )
+            return response
