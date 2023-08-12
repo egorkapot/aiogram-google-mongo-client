@@ -1,5 +1,10 @@
 from __future__ import print_function
-
+from google_access_share_bot.utils.utils import (
+    generate_id,
+    is_google_spreadsheet,
+    is_google_document,
+    get_grid_range,
+)
 import logging
 import os.path
 
@@ -12,7 +17,10 @@ from googleapiclient.errors import HttpError
 from google_access_share_bot.bot_logging.bot_logging import BotLoggingHandler
 
 # If modifying these scopes, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/drive"]
+SCOPES = [
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/spreadsheets",
+]
 
 
 class Client:
@@ -21,12 +29,12 @@ class Client:
         self.chat_id = chat_id
         self.logger = logging.getLogger("client")
         self.setup_logger()
-        self.client = self.get_client()
+        self.drive_client, self.sheets_client = self.get_client()
 
     def setup_logger(self):
         handler = BotLoggingHandler(self.bot, self.chat_id)
         formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            "%(asctime)s - %(levelname)s - %(message)s", datefmt="%y-%m-%d"
         )
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
@@ -54,22 +62,79 @@ class Client:
             with open("credentials/token.json", "w") as token:
                 token.write(creds.to_json())
         try:
-            service = build("drive", "v3", credentials=creds)
-            return service
+            drive_service = build("drive", "v3", credentials=creds)
+            sheets_service = build("sheets", "v4", credentials=creds)
+            return drive_service, sheets_service
         except HttpError as error:
             self.logger.error(f"An error occurred: {error}")
             raise error
 
-    def share_document(self, file_id, email):
+    def share_access(self, link, email):
+        """Generates the id of the document and gives the permissions to provided email"""
         user_permission = {"type": "user", "role": "writer", "emailAddress": email}
-        command = self.client.permissions().create(
+        file_id = generate_id(link)
+        command = self.drive_client.permissions().create(
             fileId=file_id,
             body=user_permission,
             fields="id",
         )
-
         try:
             command.execute()
-            self.logger.info(f"Sharing the access to {email}")
+            self.logger.info(f"Sharing the {link} to {email}")
         except Exception as e:
-            self.logger.error(f"Error sharing {file_id} access with {email}: {e}")
+            self.logger.error(f"Error sharing {link} access with {email}: {e}")
+
+    def clean_spreadsheet(self, link):
+        """
+        Receives spreadsheet object using drive client.
+        For each sheet of spreadsheet cleans the range in updateCells and highlights in white in repeatCell.
+        All these updates are stored in requests list and send to batchUpdate function to execute at once
+        """
+        spreadsheet_id = generate_id(link)
+        spreadsheet = (
+            self.sheets_client.spreadsheets()
+            .get(spreadsheetId=spreadsheet_id)
+            .execute()
+        )
+        requests = []
+        for sheet in spreadsheet["sheets"]:
+            sheet_name = sheet.get("properties", {}).get("title")
+            sheet_id = sheet.get("properties", {}).get("sheetId")
+            # TODO take list names to exclude from .env
+            if sheet_name.lower() in ["Tasks", "Косяки", "инфа об авторах"]:
+                continue
+
+            requests.append(
+                {
+                    "updateCells": {
+                        "range": get_grid_range(sheet_id, 1, 1000, 3, 26),
+                        "fields": "userEnteredValue",
+                    }
+                }
+            )
+
+            requests.append(
+                {
+                    "repeatCell": {
+                        "range": get_grid_range(sheet_id, 1, 1000, 0, 26),
+                        "cell": {
+                            "userEnteredFormat": {
+                                "backgroundColor": {
+                                    "red": 1.0,
+                                    "green": 1.0,
+                                    "blue": 1.0,
+                                }
+                            }
+                        },
+                        "fields": "userEnteredFormat(backgroundColor)",
+                    }
+                }
+            )
+        if requests:
+            body = {"requests": requests}
+            response = (
+                self.sheets_client.spreadsheets()
+                .batchUpdate(spreadsheetId=spreadsheet_id, body=body)
+                .execute()
+            )
+            return response
