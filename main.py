@@ -5,7 +5,7 @@ import telebot
 from dotenv import load_dotenv
 from telebot import types
 
-from google_access_share_bot.credentials.client import Client
+from google_access_share_bot.google_client.client import GoogleClient
 from google_access_share_bot.emails.emails import get_emails_list
 from google_access_share_bot.utils.utils import (
     is_google_document,
@@ -20,7 +20,7 @@ admin_chat_id = os.environ.get("ADMIN_CHAT_ID").split(",")
 bot = telebot.TeleBot(bot_token)
 list_of_emails = get_emails_list()
 user_data = {}
-client = Client(bot, admin_chat_id)
+client = GoogleClient(bot, admin_chat_id)
 
 users_asked_for_link = set()
 

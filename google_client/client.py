@@ -23,7 +23,7 @@ SCOPES = [
 ]
 
 
-class Client:
+class GoogleClient:
     def __init__(self, bot, chat_id):
         self.bot = bot
         self.chat_id = chat_id
@@ -45,21 +45,21 @@ class Client:
         # The file token.json stores the user's access and refresh tokens, and is
         # created automatically when the authorization flow completes for the first
         # time.
-        if os.path.exists("credentials/token.json"):
+        if os.path.exists("google_client/token.json"):
             creds = Credentials.from_authorized_user_file(
-                "credentials/token.json", SCOPES
+                "google_client/token.json", SCOPES
             )
-        # If there are no (valid) credentials available, let the user log in.
+        # If there are no (valid) google_client available, let the user log in.
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
-                    "credentials/credentials.json", SCOPES
+                    "google_client/google_client.json", SCOPES
                 )
                 creds = flow.run_local_server(port=8000)
-            # Save the credentials for the next run
-            with open("credentials/token.json", "w") as token:
+            # Save the google_client for the next run
+            with open("google_client/token.json", "w") as token:
                 token.write(creds.to_json())
         try:
             drive_service = build("drive", "v3", credentials=creds)
