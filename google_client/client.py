@@ -1,10 +1,5 @@
 from __future__ import print_function
-from google_access_share_bot.utils.utils import (
-    generate_id,
-    is_google_spreadsheet,
-    is_google_document,
-    get_grid_range,
-)
+
 import logging
 import os.path
 
@@ -14,7 +9,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from google_access_share_bot.bot_logging.bot_logging import BotLoggingHandler
+from google_access_share_bot.bot_logging.admin_logging import BotAdminLoggingHandler
+from google_access_share_bot.utils.utils import generate_id, get_grid_range
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = [
@@ -27,12 +23,12 @@ class GoogleClient:
     def __init__(self, bot, chat_id):
         self.bot = bot
         self.chat_id = chat_id
-        self.logger = logging.getLogger("client")
+        self.logger = logging.getLogger("google_logger")
         self.setup_logger()
         self.drive_client, self.sheets_client = self.get_client()
 
     def setup_logger(self):
-        handler = BotLoggingHandler(self.bot, self.chat_id)
+        handler = BotAdminLoggingHandler(self.bot, self.chat_id)
         formatter = logging.Formatter(
             "%(asctime)s - %(levelname)s - %(message)s", datefmt="%y-%m-%d"
         )

@@ -1,28 +1,45 @@
+import logging
 import os
-import json
 
 import telebot
 from dotenv import load_dotenv
+from googleapiclient.errors import HttpError
 from telebot import types
 
-from google_access_share_bot.google_client.client import GoogleClient
+from google_access_share_bot.bot_logging.user_logging import BotUserLoggingHandler
 from google_access_share_bot.emails.emails import get_emails_list
+from google_access_share_bot.google_client.client import GoogleClient
+from google_access_share_bot.mongo_client.client import MongoClientTgBot
 from google_access_share_bot.utils.utils import (
     is_google_document,
     is_google_spreadsheet,
 )
-from googleapiclient.errors import HttpError
-
 
 load_dotenv()
 bot_token = os.environ.get("DEVELOPMENT_BOT_TOKEN")
-admin_chat_id = os.environ.get("ADMIN_CHAT_ID").split(",")
+admin_chat_id = list(map(lambda x: int(x), os.environ.get("ADMIN_CHAT_ID").split(",")))
 bot = telebot.TeleBot(bot_token)
-list_of_emails = get_emails_list()
-user_data = {}
-client = GoogleClient(bot, admin_chat_id)
+list_of_emails = get_emails_list()  # TODO will be excluded
+user_data = {}  # TODO will be excluded
+google_client = GoogleClient(bot, admin_chat_id)
 
-users_asked_for_link = set()
+users_asked_for_link = set()  # TODO will be excluded
+
+
+def setup_user_logging(bot_instance: telebot.TeleBot):
+    """Set up logger for users using BotUserLoggingHandler that determines the logic of processing messages"""
+    logger = logging.getLogger("user_logging")
+    handler = BotUserLoggingHandler(bot_instance)
+    formatter = logging.Formatter(
+        "%(asctime)s - %(levelname)s - %(message)s", datefmt="%y-%m-%d"
+    )
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    return logger, handler
+
+
+user_logger, user_handler = setup_user_logging(bot)
 
 
 def send_message_to_user(user_id, message, **kwargs):
@@ -54,7 +71,7 @@ def validate_user_to_clean_table(message):
         )
     else:
         send_message_to_user(user_id, "You are not the admin")
-        client.logger.error(f"{user_id} tried to access cleantable")
+        google_client.logger.info(f"{user_id} tried to access cleantable")
 
 
 @bot.callback_query_handler(func=lambda call: call.data == "provide_link")
@@ -70,12 +87,12 @@ def clean_the_spreadsheet(message):
     link = message.text
     if is_google_spreadsheet(link):
         try:
-            client.clean_spreadsheet(link)
+            google_client.clean_spreadsheet(link)
             send_message_to_user(user_id, "Spreadsheet was cleaned")
-            client.logger.info(f"Cleaned the spreadsheet - {link}")
+            google_client.logger.info(f"Cleaned the spreadsheet - {link}")
         except HttpError as error:
             send_message_to_user(user_id, f"An error occurred {error}")
-            client.logger.error(
+            google_client.logger.error(
                 f"Failed to clean the spreadsheet - {link} due to {error}"
             )
     else:
@@ -95,6 +112,8 @@ def me_command(message):
     response += f"First Name: {first_name}\n"
     response += f"Last Name: {last_name}\n"
     response += f"Username: @{username}"
+    user_handler.set_chat_id(admin_chat_id)
+    user_logger.info(f'{message.from_user.username} requested information about himself')
     send_message_to_user(user_id, response)
 
 

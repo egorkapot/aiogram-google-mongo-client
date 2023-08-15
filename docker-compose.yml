@@ -3,19 +3,15 @@ version: '3'
 services:
   bot:
     build: .
-    ports:
-      - "80:80"
     depends_on:
       - mongo
     environment:
-      - MONGO_URL=mongo
+      MONGO_HOST: mongo
+      MONGO_PORT: ${MONGO_PORT}
 
   mongo:
     image: "mongo"
-    ports:
-      - "27017:27017"
     volumes:
       - mongodata:/data/db
-
 volumes:
   mongodata:
