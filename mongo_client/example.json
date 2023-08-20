@@ -1,7 +1,0 @@
-{
-  "_id": 12345,
-  "tg_username": "john_doe",
-  "email": "johndoe@example.com",
-  "role": "user",
-  "state": "pending"
-}

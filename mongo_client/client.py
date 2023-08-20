@@ -3,6 +3,7 @@ import logging
 from pymongo import MongoClient
 from pymongo import ReturnDocument
 import telebot
+import json
 from google_access_share_bot.bot_logging.admin_logging import BotAdminLoggingHandler
 
 
@@ -19,6 +20,7 @@ class MongoUsersClient:
         self.chat_id = chat_id
         self.logger = logging.getLogger("mongo_logger")
         self.setup_logger()
+        self.set_validation_schema()
 
     def setup_logger(self):
         handler = BotAdminLoggingHandler(self.bot, self.chat_id)
@@ -29,21 +31,48 @@ class MongoUsersClient:
         self.logger.addHandler(handler)
         self.logger.setLevel(logging.INFO)
 
-    def get_username(self, user_id):
+    def set_validation_schema(self):
+        """
+        Set or update the validation schema for the users collection.
+        """
+        with open("validation_schema.json", "r") as file:
+            validation_schema = json.load(file)
+
+        self.db.command({
+            "collMod": "users",
+            "validator": validation_schema
+        })
+
+    def get_user_data(self, user_id: int) -> dict | None:
+        """
+        Returns all the data about the user
+
+        :param user_id: Unique id of user
+        :return: Data about the user or None
+        """
+        user_data = self.users_collection.find_one(
+            {"_id": user_id}
+        )
+        return user_data
+
+    def get_username(self, user_id: int) -> str | None:
         """
         Returns the username of specific user
 
         :param user_id: Unique id of user
-        :return: Username of user
+        :return: Username of user or None
         """
-        username = self.users_collection.find_one(
-            {"_id": user_id},
-            {"username": 1,
-             "_id": 0}
-        )
+        username = self.get_user_data(user_id).get("username")
         return username
 
-    def add_user(self, user_id, data_):
+    def add_user(self, user_id: int, data_):
+        """
+        Adds the user to database
+
+        :param user_id: Unique id of user
+        :param data_: Message that contains information to update the user
+        :return: None
+        """
         try:
             self.users_collection.insert_one(
                 {"_id": user_id,
@@ -56,7 +85,7 @@ class MongoUsersClient:
         except Exception as e:
             self.logger.error(f"Error registering {user_id} with username: {data_.get('Username')} - {e}")
 
-    def delete_user(self, user_id):
+    def delete_user(self, user_id: int):
         """
         Deletes user from users_collection
 
@@ -71,7 +100,7 @@ class MongoUsersClient:
             f'Information about {username} was deleted from database'
         )
 
-    def update_user(self, user_id, update: dict, upsert=False) -> None:
+    def update_user(self, user_id: int, update: dict, upsert=False) -> None:
         """
         Updates users information if _id is found.
 
@@ -91,22 +120,3 @@ class MongoUsersClient:
         self.logger.info(
             f'Information about {username} was changed to {update}'
         )
-
-
-bot = telebot.TeleBot('6263020961:AAF8DMu2LOW2GGM8gu27nwvkySfJW_FGnA4')
-users_class = MongoUsersClient(bot, 798247808, 'localhost', 27017, 'db')
-data = {
-    "User ID": "822288821",
-    "First Name": "Stas",
-    "Last Name": "Makarov",
-    "Username": "@makar_ov02"
-}
-
-# users_class.add_user(
-#     data.get("User ID"),
-#     data
-# )
-
-users_class.delete_user(
-    data.get("User ID")
-)
