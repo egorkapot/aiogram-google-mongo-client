@@ -30,7 +30,7 @@ class GoogleClient:
     def setup_logger(self):
         handler = BotAdminLoggingHandler(self.bot, self.chat_id)
         formatter = logging.Formatter(
-            "%(asctime)s - %(levelname)s - %(message)s", datefmt="%y-%m-%d"
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%y-%m-%d"
         )
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)

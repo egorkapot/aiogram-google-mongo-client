@@ -9,7 +9,7 @@ from telebot import types
 from google_access_share_bot.bot_logging.user_logging import BotUserLoggingHandler
 from google_access_share_bot.emails.emails import get_emails_list
 from google_access_share_bot.google_client.client import GoogleClient
-from google_access_share_bot.mongo_client.client import MongoClientTgBot
+from google_access_share_bot.mongo_client.client import MongoUsersClient
 from google_access_share_bot.utils.utils import (
     is_google_document,
     is_google_spreadsheet,
@@ -17,11 +17,14 @@ from google_access_share_bot.utils.utils import (
 
 load_dotenv()
 bot_token = os.environ.get("DEVELOPMENT_BOT_TOKEN")
-admin_chat_id = list(map(lambda x: int(x), os.environ.get("ADMIN_CHAT_ID").split(",")))
+admin_chat_id = list(map(lambda x: int(x), os.environ.get("ADMIN_CHAT_ID").split(","))) #TODO str might be ok
 bot = telebot.TeleBot(bot_token)
 list_of_emails = get_emails_list()  # TODO will be excluded
 user_data = {}  # TODO will be excluded
 google_client = GoogleClient(bot, admin_chat_id)
+MONGO_HOST = os.environ.get("MONGO_HOST", "localhost")
+MONGO_PORT = int(os.environ.get("MONGO_PORT", 27017))
+
 
 users_asked_for_link = set()  # TODO will be excluded
 
