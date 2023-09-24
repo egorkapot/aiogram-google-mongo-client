@@ -9,7 +9,7 @@ exclude = '''
   | \.mypy_cache
   | \.tox
   | \.venv
-  | tg_bot
+  | access_bot
   | _build
   | buck-out
   | build
@@ -20,4 +20,4 @@ exclude = '''
 '''
 
 [tool.isort]
-skip = ".venv, tg_bot"
+skip = ".venv, access_bot"

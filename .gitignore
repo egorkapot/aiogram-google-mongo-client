@@ -103,6 +103,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+access_bot/
 
 # Spyder project settings
 .spyderproject

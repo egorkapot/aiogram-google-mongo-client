@@ -1,10 +1,12 @@
+import json
 import logging
 
-from pymongo import MongoClient
-from pymongo import ReturnDocument
-import telebot
-import json
-from google_access_share_bot.bot_logging.admin_logging import BotAdminLoggingHandler
+from aiogram import Bot
+from pymongo import MongoClient, ReturnDocument
+from google_access_share_bot.settings import Settings
+from google_access_share_bot.bot_logging.admin_logging import \
+    BotAdminLoggingHandler
+from google_access_share_bot.utils.utils import setup_logger
 
 
 class MongoUsersClient:
@@ -12,36 +14,32 @@ class MongoUsersClient:
     Class representation of Mongo Client that is working directly with user collection.
     Logging is done using telegram bot
     """
-    def __init__(self, bot_: telebot.TeleBot, chat_id: str | int, host: str, port: int | None, database_name: str):
+
+    def __init__(
+        self,
+        bot_: Bot,
+        chat_id: str | int,
+        host: str,
+        port: int | None,
+        database_name: str,
+    ):
         self.client = MongoClient(host, port)
         self.db = self.client[database_name]
         self.users_collection = self.db.users
         self.bot = bot_
         self.chat_id = chat_id
-        self.logger = logging.getLogger("mongo_logger")
-        self.setup_logger()
+        self.logger = logging.getLogger(__name__)
         self.set_validation_schema()
-
-    def setup_logger(self):
-        handler = BotAdminLoggingHandler(self.bot, self.chat_id)
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%y-%m-%d"
-        )
-        handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
-        self.logger.setLevel(logging.INFO)
+        setup_logger(self.logger, self.bot, self.chat_id)
 
     def set_validation_schema(self):
         """
-        Set or update the validation schema for the users collection.
+        Set or update the validation schema for the users' collection.
         """
-        with open("validation_schema.json", "r") as file:
+        with open(Settings().validation_schema_path, "r") as file:
             validation_schema = json.load(file)
 
-        self.db.command({
-            "collMod": "users",
-            "validator": validation_schema
-        })
+        self.db.command({"collMod": "users", "validator": validation_schema})
 
     def get_user_data(self, user_id: int) -> dict | None:
         """
@@ -50,9 +48,7 @@ class MongoUsersClient:
         :param user_id: Unique id of user
         :return: Data about the user or None
         """
-        user_data = self.users_collection.find_one(
-            {"_id": user_id}
-        )
+        user_data = self.users_collection.find_one({"_id": user_id})
         return user_data
 
     def get_username(self, user_id: int) -> str | None:
@@ -75,15 +71,20 @@ class MongoUsersClient:
         """
         try:
             self.users_collection.insert_one(
-                {"_id": user_id,
-                 "username": data_.get('Username'),
-                 "role": "user",
-                 "email": None,
-                 "status": "registered",
-                 "state": None})
+                {
+                    "_id": user_id,
+                    "username": data_.get("username"),
+                    "role": data_.get("role"),
+                    "email": None,
+                    "status": "registered",
+                    "state": None, #might be removed
+                }
+            )
             self.logger.info(f"Registered {data_.get('Username')} with id - {user_id}")
         except Exception as e:
-            self.logger.error(f"Error registering {user_id} with username: {data_.get('Username')} - {e}")
+            self.logger.error(
+                f"Error registering {user_id} with username: {data_.get('Username')} - {e}"
+            )
 
     def delete_user(self, user_id: int):
         """
@@ -93,12 +94,9 @@ class MongoUsersClient:
         """
         username = self.get_username(user_id)
         self.users_collection.find_one_and_delete(
-            {"_id": user_id},
-            return_document=ReturnDocument.BEFORE
+            {"_id": user_id}, return_document=ReturnDocument.BEFORE
         )
-        self.logger.info(
-            f'Information about {username} was deleted from database'
-        )
+        self.logger.info(f"Information about {username} was deleted from database")
 
     def update_user(self, user_id: int, update: dict, upsert=False) -> None:
         """
@@ -115,8 +113,6 @@ class MongoUsersClient:
             {"_id": user_id},
             {"$set": update},
             upsert=upsert,
-            return_document=ReturnDocument.BEFORE
+            return_document=ReturnDocument.BEFORE,
         )
-        self.logger.info(
-            f'Information about {username} was changed to {update}'
-        )
+        self.logger.info(f"Information about {username} was changed to {update}")

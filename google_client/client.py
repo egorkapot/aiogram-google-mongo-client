@@ -9,7 +9,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from google_access_share_bot.bot_logging.admin_logging import BotAdminLoggingHandler
+from google_access_share_bot.bot_logging.admin_logging import \
+    BotAdminLoggingHandler
 from google_access_share_bot.utils.utils import generate_id, get_grid_range
 
 # If modifying these scopes, delete the file token.json.

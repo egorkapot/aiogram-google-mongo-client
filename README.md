@@ -3,6 +3,8 @@ Telegram bot that will be sharing the accesses to documents with people allowed
 
 #TODO add CI/CD to deploy automatically
 
+For this 
+
 # Working with Kamatera
 
 1. Go to [Kamatera](https://www.kamatera.com/) and create a New Server. Choose the configuration you need
@@ -47,10 +49,12 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 ```
 pip install -r requirements.txt
 ```
+
 7. Run python command 
 ```
 python3 main.py
 ```
+Sometimes you might need to install aiogram using `pip install -U --pre aiogram`
 
 Also you can run this command in detach mode. To dom this you need to install `screen`
 ```
