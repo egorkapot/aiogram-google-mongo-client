@@ -2,9 +2,10 @@ from pydantic import Field, SecretStr, field_validator, BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from exceptions.exceptions import MissingEnvironmentVariableException
 from typing import Any, Union
-import json
+from google_access_share_bot.utils.utils import singleton
 
 
+@singleton
 class Settings(BaseSettings):
     """
     Class to store all settings for this app. All property must be

@@ -41,14 +41,26 @@ class MongoUsersClient:
 
         self.db.command({"collMod": "users", "validator": validation_schema})
 
-    def get_user_data(self, user_id: int) -> dict | None:
-        """
-        Returns all the data about the user
+    # def get_user_data(self, user_id: int) -> dict | None:
+    #     """
+    #     Returns all the data about the user
+    #
+    #     :param user_id: Unique id of user
+    #     :return: Data about the user or None
+    #     """
+    #     user_data = self.users_collection.find_one({"_id": user_id})
+    #     return user_data
 
-        :param user_id: Unique id of user
-        :return: Data about the user or None
+    def get_user_data(self, data: int | str, filter_="_id", ):
         """
-        user_data = self.users_collection.find_one({"_id": user_id})
+       Returns all the data about the user.
+       By default, searches by _id
+
+       :param data: Data to search in the database
+       :param filter_: Column to apply filter
+       :return: Data about the user or None
+       """
+        user_data = self.users_collection.find_one(f"{filter_}: {data}")
         return user_data
 
     def get_username(self, user_id: int) -> str | None:
@@ -61,7 +73,7 @@ class MongoUsersClient:
         username = self.get_user_data(user_id).get("username")
         return username
 
-    def add_user(self, user_id: int, data_):
+    def add_user(self, user_id: int, data_: dict):
         """
         Adds the user to database
 
@@ -75,12 +87,13 @@ class MongoUsersClient:
                     "_id": user_id,
                     "username": data_.get("username"),
                     "role": data_.get("role"),
-                    "email": None,
-                    "status": "registered",
-                    "state": None, #might be removed
+                    "email": data_.get("email"),
+                    "status": data_.get("status"),
                 }
             )
-            self.logger.info(f"Registered {data_.get('Username')} with id - {user_id}")
+            self.logger.info(f"Added the user with parameters:\n"
+                             f"name: {data_.get('username')}\n"
+                             f"id: {user_id}")
         except Exception as e:
             self.logger.error(
                 f"Error registering {user_id} with username: {data_.get('Username')} - {e}"

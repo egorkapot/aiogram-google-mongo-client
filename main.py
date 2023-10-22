@@ -15,7 +15,10 @@ from google_access_share_bot.google_client.client import GoogleClient
 from google_access_share_bot.mongo_client.client import MongoUsersClient
 from google_access_share_bot.utils.utils import (is_google_document,
                                                  is_google_spreadsheet)
-from google_access_share_bot.handlers.registration import RegistrationRouter
+from google_access_share_bot.handlers.cmd_start import RegistrationRouter
+from google_access_share_bot.handlers.cmd_cancel import CancelRouter
+from google_access_share_bot.handlers.cmd_me import MeRouter
+
 settings = Settings()
 bot_token = settings.get_bot_token().get_secret_value()
 author_chat_id = settings.author_chat_id  # Chat id of creator for logging
@@ -26,28 +29,23 @@ google_client = GoogleClient(bot, admin_chat_id)
 MONGO_HOST = settings.mongo_host
 MONGO_PORT = settings.mongo_port
 mongo_client = MongoUsersClient(bot, author_chat_id, MONGO_HOST, MONGO_PORT, 'db')
-registration_router = RegistrationRouter(bot, mongo_client, author_chat_id)
-me_router = Router()
+start_router = RegistrationRouter(bot, mongo_client, author_chat_id)
+cancel_router = CancelRouter()
+me_router = MeRouter()
 
 
 async def main() -> None:
-    dp.include_routers(me_router, registration_router)
+    """
+    Includes all routers and start the application.
+    Important thing is to import the global routers before state-specific.
+    This ensures that when a user enters a global command, it's processed correctly
+    regardless of the FSM state they're in
+    :return: None
+    """
+    dp.include_routers(
+        cancel_router, me_router, start_router)
     await dp.start_polling(bot)
 
-
-@me_router.message(Command("me"))
-async def me_command(message: Message):
-    """Get user information"""
-    user_id = message.from_user.id
-    first_name = message.from_user.first_name
-    last_name = message.from_user.last_name
-    username = message.from_user.username
-    # Construct the message to send back to the user
-    response = f"User ID: {user_id}\n"
-    response += f"First Name: {first_name}\n"
-    response += f"Last Name: {last_name}\n"
-    response += f"Username: @{username}"
-    await message.answer(response)
 
 if __name__ == "__main__":
     asyncio.run(main())

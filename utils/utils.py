@@ -73,3 +73,19 @@ def is_google_email(email: str) -> bool:
     # Check if the domain is gmail.com or your custom Google Workspace domain
     return domain in ["gmail.com", "biggiko.com", "alreadymedia.com"]
 
+
+def singleton(cls):
+    """
+    should be used as decorator for class ensuring single ton pattern
+    :param cls:
+    :return:
+    """
+    instances = {}
+
+    def get_instance(*args, **kwargs):
+        if cls not in instances:
+            instances[cls] = cls(*args, **kwargs)
+        return instances[cls]
+
+    return get_instance
+

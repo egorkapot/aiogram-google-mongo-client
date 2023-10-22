@@ -132,3 +132,6 @@ cython_debug/
 # Examples
 kamatera.example
 
+#Bot package
+commands.example
+

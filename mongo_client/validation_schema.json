@@ -1,16 +1,16 @@
 {
     "$jsonSchema": {
         "bsonType": "object",
-        "required": ["_id", "username", "role", "email", "status", "state"],
+        "required": ["_id", "username", "role", "email", "status"],
         "properties": {
             "_id": {
-                "bsonType": "int"
+                "bsonType": ["long", "int"]
             },
             "username": {
-                "bsonType": "string"
+                "bsonType": ["string"]
             },
             "role": {
-                "bsonType": "string",
+                "bsonType": ["string", "null"],
                 "enum": ["admin", "user", "biggiko", null]
             }
         }

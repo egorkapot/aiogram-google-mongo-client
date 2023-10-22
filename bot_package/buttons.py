@@ -27,6 +27,33 @@ biggiko_markup = ReplyKeyboardMarkup(
 )
 
 
+def convert_to_inline(button: KeyboardButton, callback_data: str = "") -> InlineKeyboardButton:
+    """
+    Converts ReplyKeyboardButton into InlineButton
+    :param button: ReplyKeyboardButton
+    :param callback_data: callback data to send
+    :return: InlineKeyboardButton
+    """
+    return InlineKeyboardButton(text=button.text, callback_data=callback_data)
+
+
+def convert_markup_to_inline(markup: ReplyKeyboardMarkup, callback_data_list: list = None) -> InlineKeyboardMarkup:
+    """
+    Converts the list of buttons and callbacks to InlineKeyboardMarkup
+    :param markup: ReplyKeyboard markup
+    :param callback_data_list: list of callbacks to map with buttons
+    :return: InlineKeyboardMarkup
+    """
+    if callback_data_list is None:
+        callback_data_list = [""] * len(markup.keyboard)
+
+    inline_keyboard = []
+    for row, callback_data_row in zip(markup.keyboard, callback_data_list):
+        inline_row = [convert_to_inline(button, callback_data) for button, callback_data in zip(row, callback_data_row)]
+        inline_keyboard.append(inline_row)
+    return InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
+
+
 def generate_confirmation_markup(user_id: int):
     """
     Generates the markup for author with the callback buttons if to accept the registration or not
@@ -54,7 +81,12 @@ def generate_user_role(user_id: int):
     return role_markup
 
 
-def create_initial_markup(role):
+def create_initial_markup(role) -> ReplyKeyboardMarkup:
+    """
+    Creates a markup for user depending on provided role
+    :param role: user's role
+    :return: markup of keyboard buttons
+    """
     if role == "admin":
         return admin_markup
     elif role == "user":
