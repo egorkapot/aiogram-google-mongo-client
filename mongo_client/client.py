@@ -4,8 +4,6 @@ import logging
 from aiogram import Bot
 from pymongo import MongoClient, ReturnDocument
 from google_access_share_bot.settings import Settings
-from google_access_share_bot.bot_logging.admin_logging import \
-    BotAdminLoggingHandler
 from google_access_share_bot.utils.utils import setup_logger
 
 
@@ -41,26 +39,16 @@ class MongoUsersClient:
 
         self.db.command({"collMod": "users", "validator": validation_schema})
 
-    # def get_user_data(self, user_id: int) -> dict | None:
-    #     """
-    #     Returns all the data about the user
-    #
-    #     :param user_id: Unique id of user
-    #     :return: Data about the user or None
-    #     """
-    #     user_data = self.users_collection.find_one({"_id": user_id})
-    #     return user_data
-
-    def get_user_data(self, data: int | str, filter_="_id", ):
+    def get_user_data(self, value: int | str, filter_="_id") -> dict | None:
         """
        Returns all the data about the user.
        By default, searches by _id
 
-       :param data: Data to search in the database
-       :param filter_: Column to apply filter
-       :return: Data about the user or None
+       :param filter_: Column to apply filter by default it is _id column
+       :param value: Data to search in the database
+       :return: User's data to return
        """
-        user_data = self.users_collection.find_one(f"{filter_}: {data}")
+        user_data = self.users_collection.find_one({filter_: value})
         return user_data
 
     def get_username(self, user_id: int) -> str | None:
@@ -129,3 +117,4 @@ class MongoUsersClient:
             return_document=ReturnDocument.BEFORE,
         )
         self.logger.info(f"Information about {username} was changed to {update}")
+

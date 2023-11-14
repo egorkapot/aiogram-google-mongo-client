@@ -11,7 +11,7 @@ from googleapiclient.errors import HttpError
 
 from google_access_share_bot.bot_logging.admin_logging import \
     BotAdminLoggingHandler
-from google_access_share_bot.utils.utils import generate_id, get_grid_range
+from google_access_share_bot.google_client.utils import generate_id, get_grid_range
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = [
@@ -52,7 +52,7 @@ class GoogleClient:
                 creds.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
-                    "google_client/google_client.json", SCOPES
+                    "google_client/credentials.json", SCOPES
                 )
                 creds = flow.run_local_server(port=8000)
             # Save the google_client for the next run

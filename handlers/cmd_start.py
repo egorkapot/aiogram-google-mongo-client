@@ -6,9 +6,10 @@ from aiogram.fsm.state import StatesGroup, State
 from google_access_share_bot.mongo_client.client import MongoUsersClient
 from aiogram import Bot
 from google_access_share_bot.bot_package.buttons import (
-    create_initial_markup, generate_confirmation_markup, generate_user_role)
+    reply_buttons, inline_buttons)
 import logging
-from google_access_share_bot.utils.utils import setup_logger, is_google_email
+from google_access_share_bot.utils.utils import setup_logger
+from google_access_share_bot.google_client.utils import is_google_email
 
 
 class RegistrationStates(StatesGroup):
@@ -54,8 +55,8 @@ class RegistrationRouter(Router):
         If there is user data in database, and he is registered - proceed with markup
         If there is user data but status is not registered or there is no data at all-send to registration
 
-        :param message: message from user
-        :param state: current state of user
+        :param message: Message from user
+        :param state: Current state of user
         :return:
         """
         await state.clear()
@@ -63,7 +64,7 @@ class RegistrationRouter(Router):
         user_data = self.mongo_client.get_user_data(user_id_)
         if user_data and user_data.get("status") == "registered":
             role = user_data.get("role")
-            markup = create_initial_markup(role)
+            markup = reply_buttons.create_initial_markup(role)
             await message.answer("Choose what you need", reply_markup=markup)
         elif user_data and user_data.get("status") != "registered":
             self.mongo_client.delete_user(user_id_)
@@ -73,10 +74,12 @@ class RegistrationRouter(Router):
             await message.answer("Registration process created, please provide your email")
             await state.set_state(RegistrationStates.awaiting_for_email)
 
-    async def email_is_not_valid(self, message: Message) -> None:
+    @staticmethod
+    async def email_is_not_valid(message: Message) -> None:
         """
         Respond the user that email is not valid
-        :param message: incoming message from user
+
+        :param message: Message from user
         :return: None
         """
         await message.answer(
@@ -88,8 +91,9 @@ class RegistrationRouter(Router):
         Proceed if user's email is valid. Updates the user's state and adds it to database.
         Sends the author a message for approval with the user's parameters and confirmation markup.
         Clears the user's state in the end.
-        :param message: message from user
-        :param state: current state of user
+
+        :param message: Message from user
+        :param state: Current state of user
         :return: None
         """
         user_id_ = int(message.from_user.id)
@@ -106,7 +110,7 @@ class RegistrationRouter(Router):
             f"id: {user_id_}\n"
             f"email: {message.text}\n"
             f"Wants to register. Approve?",
-            reply_markup=generate_confirmation_markup(message.from_user.id)
+            reply_markup=inline_buttons.generate_confirmation_markup(message.from_user.id)
         )
         await state.clear()
 
@@ -114,7 +118,7 @@ class RegistrationRouter(Router):
         """
         Proceed if admin approves the user's registration.
         Extracts the user_id from call data and creates a markup for admin with role buttons.
-        :param call: call from markup
+        :param call: Call from markup
         :return: None
         """
         user_id_ = int(call.data.split("_")[1])
@@ -124,7 +128,7 @@ class RegistrationRouter(Router):
             reply_markup=None  # This removes the inline keyboard
         )
         await self.bot.send_message(
-            self.author_chat_id, "Please set the role to user", reply_markup=generate_user_role(user_id_)
+            self.author_chat_id, "Please set the role to user", reply_markup=inline_buttons.generate_user_role(user_id_)
         )
         self.mongo_client.update_user(user_id_, {"status": "awaiting_for_role"})
 
@@ -133,7 +137,7 @@ class RegistrationRouter(Router):
         Proceed if admin denies the user's registration.
         Deletes the user from database and sends the message to user and author
 
-        :param call: call from markup
+        :param call: Call from markup
         :return: None
         """
         user_id_ = int(call.data.split("_")[1])
@@ -152,7 +156,7 @@ class RegistrationRouter(Router):
     async def handle_role(self, call: CallbackQuery) -> None:
         """
         Creates role for user and finishes registration in database
-        :param call:
+        :param call: Call from markup
         :return:
         """
         await self.bot.edit_message_reply_markup(
@@ -166,8 +170,10 @@ class RegistrationRouter(Router):
         self.logger.info(f"{self.mongo_client.get_username(user_id_)} was registered with the role - {role_}")
         await self.bot.send_message(
             user_id_, "You have been registered! Please see the available options",
-            reply_markup=create_initial_markup(role_)
+            reply_markup=reply_buttons.create_initial_markup(role_)
         )
+
+
 
 
 
