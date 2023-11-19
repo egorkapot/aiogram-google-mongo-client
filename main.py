@@ -1,24 +1,25 @@
+import asyncio
 import logging
 import os
-from settings import Settings
-from aiogram import F, Router
+
+from aiogram import Bot, Dispatcher, F, Router
 from aiogram.filters import Command
-from googleapiclient.errors import HttpError
-import asyncio
-from aiogram.types import Message
-from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.types import Message
+from googleapiclient.errors import HttpError
+
 from google_access_share_bot.bot_logging.user_logging import \
     BotUserLoggingHandler
 from google_access_share_bot.bot_package.buttons import *
 from google_access_share_bot.google_client.client import GoogleClient
-from google_access_share_bot.mongo_client.client import MongoUsersClient
 from google_access_share_bot.google_client.utils import (is_google_document,
-                                                 is_google_spreadsheet)
-from google_access_share_bot.handlers.cmd_start import RegistrationRouter
+                                                         is_google_spreadsheet)
 from google_access_share_bot.handlers.cmd_cancel import CancelRouter
-from google_access_share_bot.handlers.cmd_me import MeRouter
 from google_access_share_bot.handlers.cmd_delete import DeleteRouter
+from google_access_share_bot.handlers.cmd_me import MeRouter
+from google_access_share_bot.handlers.cmd_start import RegistrationRouter
+from google_access_share_bot.mongo_client.client import MongoUsersClient
+from settings import Settings
 
 settings = Settings()
 bot_token = settings.get_bot_token().get_secret_value()
@@ -28,7 +29,7 @@ dp = Dispatcher(storage=MemoryStorage())
 google_client = GoogleClient(bot, author_chat_id)
 MONGO_HOST = settings.mongo_host
 MONGO_PORT = settings.mongo_port
-mongo_client = MongoUsersClient(bot, author_chat_id, MONGO_HOST, MONGO_PORT, 'db')
+mongo_client = MongoUsersClient(bot, author_chat_id, MONGO_HOST, MONGO_PORT, "db")
 start_router = RegistrationRouter(bot, mongo_client, author_chat_id)
 cancel_router = CancelRouter()
 me_router = MeRouter()
@@ -43,13 +44,9 @@ async def main() -> None:
     regardless of the FSM state they're in
     :return: None
     """
-    dp.include_routers(
-        cancel_router, delete_router, me_router, start_router)
+    dp.include_routers(cancel_router, delete_router, me_router, start_router)
     await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-

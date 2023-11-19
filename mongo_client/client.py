@@ -3,6 +3,7 @@ import logging
 
 from aiogram import Bot
 from pymongo import MongoClient, ReturnDocument
+
 from google_access_share_bot.settings import Settings
 from google_access_share_bot.utils.utils import setup_logger
 
@@ -28,7 +29,7 @@ class MongoUsersClient:
         self.chat_id = chat_id
         self.logger = logging.getLogger(__name__)
         self.set_validation_schema()
-        setup_logger(self.logger, self.bot, self.chat_id)
+        setup_logger(self.logger, self.bot, self.chat_id, logging.ERROR)
 
     def set_validation_schema(self):
         """
@@ -41,24 +42,24 @@ class MongoUsersClient:
 
     def get_user_data(self, value: int | str, filter_="_id") -> dict | None:
         """
-       Returns all the data about the user.
-       By default, searches by _id
+        Returns all the data about the user.
+        By default, searches by _id
 
-       :param filter_: Column to apply filter by default it is _id column
-       :param value: Data to search in the database
-       :return: User's data to return
-       """
+        :param filter_: Column to apply filter by default it is _id column
+        :param value: Data to search in the database
+        :return: User's data
+        """
         user_data = self.users_collection.find_one({filter_: value})
         return user_data
 
-    def get_username(self, user_id: int) -> str | None:
+    def get_username(self, value: int | str, filter_="_id") -> str | None:
         """
         Returns the username of specific user
 
-        :param user_id: Unique id of user
-        :return: Username of user or None
+        :param filter_: Column to apply filter by default it is _id column
+        :param value: Data to search in the database
         """
-        username = self.get_user_data(user_id).get("username")
+        username = self.users_collection.find_one({filter_: value}).get("username")
         return username
 
     def add_user(self, user_id: int, data_: dict):
@@ -79,23 +80,27 @@ class MongoUsersClient:
                     "status": data_.get("status"),
                 }
             )
-            self.logger.info(f"Added the user with parameters:\n"
-                             f"name: {data_.get('username')}\n"
-                             f"id: {user_id}")
+            self.logger.info(
+                f"Added the user with parameters:\n"
+                f"name: {data_.get('username')}\n"
+                f"id: {user_id}"
+            )
         except Exception as e:
             self.logger.error(
                 f"Error registering {user_id} with username: {data_.get('Username')} - {e}"
             )
 
-    def delete_user(self, user_id: int):
+    def delete_user(self, value: int | str, filter_="_id"):
         """
         Deletes user from users_collection
 
-        :param user_id: Unique id of user
+        :param filter_: Column to apply filter by default it is _id column
+        :param value: Data to search in the database
+        :return: None
         """
-        username = self.get_username(user_id)
+        username = self.get_username(value, filter_)
         self.users_collection.find_one_and_delete(
-            {"_id": user_id}, return_document=ReturnDocument.BEFORE
+            {filter_: value}, return_document=ReturnDocument.BEFORE
         )
         self.logger.info(f"Information about {username} was deleted from database")
 
@@ -117,4 +122,3 @@ class MongoUsersClient:
             return_document=ReturnDocument.BEFORE,
         )
         self.logger.info(f"Information about {username} was changed to {update}")
-

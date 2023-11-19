@@ -1,15 +1,16 @@
-from aiogram import Router, F
-from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery
-from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
-from google_access_share_bot.mongo_client.client import MongoUsersClient
-from aiogram import Bot
-from google_access_share_bot.bot_package.buttons import (
-    reply_buttons, inline_buttons)
 import logging
-from google_access_share_bot.utils.utils import setup_logger
+
+from aiogram import Bot, F, Router
+from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.types import CallbackQuery, Message
+
+from google_access_share_bot.bot_package.buttons import (inline_buttons,
+                                                         reply_buttons)
 from google_access_share_bot.google_client.utils import is_google_email
+from google_access_share_bot.mongo_client.client import MongoUsersClient
+from google_access_share_bot.utils.utils import setup_logger
 
 
 class RegistrationStates(StatesGroup):
@@ -37,18 +38,14 @@ class RegistrationRouter(Router):
         self.message.register(
             self.email_is_valid,
             RegistrationStates.awaiting_for_email,
-            F.text.func(lambda text: is_google_email(text)))
-        self.message.register(self.email_is_not_valid, RegistrationStates.awaiting_for_email)
-        self.callback_query.register(
-            self.handle_approve, F.data.startswith("approve_")
+            F.text.func(lambda text: is_google_email(text)),
         )
-        self.callback_query.register(
-            self.handle_deny,
-            F.data.startswith("deny_")
+        self.message.register(
+            self.email_is_not_valid, RegistrationStates.awaiting_for_email
         )
-        self.callback_query.register(
-            self.handle_role, F.data.startswith("role_")
-        )
+        self.callback_query.register(self.handle_approve, F.data.startswith("approve_"))
+        self.callback_query.register(self.handle_deny, F.data.startswith("deny_"))
+        self.callback_query.register(self.handle_role, F.data.startswith("role_"))
 
     async def cmd_start(self, message: Message, state: FSMContext):
         """
@@ -68,10 +65,14 @@ class RegistrationRouter(Router):
             await message.answer("Choose what you need", reply_markup=markup)
         elif user_data and user_data.get("status") != "registered":
             self.mongo_client.delete_user(user_id_)
-            await message.answer("Registration process created, please provide your email")
+            await message.answer(
+                "Registration process created, please provide your email"
+            )
             await state.set_state(RegistrationStates.awaiting_for_email)
         else:
-            await message.answer("Registration process created, please provide your email")
+            await message.answer(
+                "Registration process created, please provide your email"
+            )
             await state.set_state(RegistrationStates.awaiting_for_email)
 
     @staticmethod
@@ -97,8 +98,10 @@ class RegistrationRouter(Router):
         :return: None
         """
         user_id_ = int(message.from_user.id)
-        await message.answer(f"The email - {message.text} was sent to approval.\n\n"
-                             f"We will let you know once you have the access")
+        await message.answer(
+            f"The email - {message.text} was sent to approval.\n\n"
+            f"We will let you know once you have the access"
+        )
         await state.update_data(username=message.from_user.username.lower())
         await state.update_data(email=message.text.lower())
         user_state = await state.get_data()
@@ -110,7 +113,9 @@ class RegistrationRouter(Router):
             f"id: {user_id_}\n"
             f"email: {message.text}\n"
             f"Wants to register. Approve?",
-            reply_markup=inline_buttons.generate_confirmation_markup(message.from_user.id)
+            reply_markup=inline_buttons.generate_confirmation_markup(
+                message.from_user.id
+            ),
         )
         await state.clear()
 
@@ -122,13 +127,9 @@ class RegistrationRouter(Router):
         :return: None
         """
         user_id_ = int(call.data.split("_")[1])
-        await self.bot.edit_message_reply_markup(
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            reply_markup=None  # This removes the inline keyboard
-        )
-        await self.bot.send_message(
-            self.author_chat_id, "Please set the role to user", reply_markup=inline_buttons.generate_user_role(user_id_)
+        await call.message.edit_text(
+            "Please set the role to user",
+            reply_markup=inline_buttons.generate_user_role(user_id_),
         )
         self.mongo_client.update_user(user_id_, {"status": "awaiting_for_role"})
 
@@ -141,40 +142,31 @@ class RegistrationRouter(Router):
         :return: None
         """
         user_id_ = int(call.data.split("_")[1])
-        await self.bot.edit_message_reply_markup(
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            reply_markup=None  # This removes the inline keyboard
+        username = self.mongo_client.get_username(user_id_)
+        await call.message.answer(
+            f"You have denied the registration for user: {username}"
         )
         await self.bot.send_message(
             user_id_, "Registration process was denied by admin @egorkapot"
         )
-        username = self.mongo_client.get_username(user_id_)
-        self.logger.info(f"You have denied the registration for {username}")
+        self.logger.info(f"Registration for {username} was denied")
         self.mongo_client.delete_user(user_id_)
 
     async def handle_role(self, call: CallbackQuery) -> None:
         """
         Creates role for user and finishes registration in database
+
         :param call: Call from markup
         :return:
         """
-        await self.bot.edit_message_reply_markup(
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            reply_markup=None  # This removes the inline keyboard
-        )
         user_id_ = int(call.data.split("_")[2])
         role_ = call.data.split("_")[1]
         self.mongo_client.update_user(user_id_, {"role": role_, "status": "registered"})
-        self.logger.info(f"{self.mongo_client.get_username(user_id_)} was registered with the role - {role_}")
-        await self.bot.send_message(
-            user_id_, "You have been registered! Please see the available options",
-            reply_markup=reply_buttons.create_initial_markup(role_)
+        self.logger.info(
+            f"{self.mongo_client.get_username(user_id_)} was registered with the role - {role_}"
         )
-
-
-
-
-
-
+        await self.bot.send_message(
+            user_id_,
+            "You have been registered! Please see the available options",
+            reply_markup=reply_buttons.create_initial_markup(role_),
+        )

@@ -12,6 +12,10 @@
             "role": {
                 "bsonType": ["string", "null"],
                 "enum": ["admin", "user", "biggiko", null]
+            },
+            "email": {
+                "bsonType": ["string"],
+                "maxItems": 1
             }
         }
     }

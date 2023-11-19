@@ -1,11 +1,12 @@
-from aiogram import Router, F
-from aiogram.filters import Command
-from aiogram.types import Message, ReplyKeyboardRemove
-from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
-from aiogram import Bot
-from google_access_share_bot.utils.utils import setup_logger
 import logging
+
+from aiogram import Bot, F, Router
+from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.types import Message, ReplyKeyboardRemove
+
+from google_access_share_bot.utils.utils import setup_logger
 
 
 class CancelRouter(Router):
@@ -17,7 +18,5 @@ class CancelRouter(Router):
         await state.clear()
         await message.answer(
             text="Action was cancelled. You can start again using /start command or others",
-            reply_markup=ReplyKeyboardRemove()
+            reply_markup=ReplyKeyboardRemove(),
         )
-
-

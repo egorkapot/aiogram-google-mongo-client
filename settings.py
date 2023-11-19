@@ -1,9 +1,11 @@
-from pydantic import Field, SecretStr, field_validator, BaseModel
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from exceptions.exceptions import MissingEnvironmentVariableException
-from typing import Any, Union
-from google_access_share_bot.utils.utils import singleton
 from enum import Enum
+from typing import Any, Union
+
+from pydantic import BaseModel, Field, SecretStr, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from exceptions.exceptions import MissingEnvironmentVariableException
+from google_access_share_bot.utils.utils import singleton
 
 
 class Tables(Enum):
@@ -11,6 +13,7 @@ class Tables(Enum):
     Class to store all tables to retrieve their info later.
     To access the value of table you should access its value like Tables[TABLE_NAME]
     """
+
     WEB_CONTENT = "web_content"
     WEB_AI_CONTENT = "web_ai_content"
     SEO_CONTENT = "seo_content"
@@ -26,6 +29,7 @@ class Settings(BaseSettings):
 
     To retrieve secret values use get_secret_value() function
     """
+
     tier: str = Field("development", env="TIER")
     production_bot_token: SecretStr = Field(..., env="PRODUCTION_BOT_TOKEN")
     development_bot_token: SecretStr = Field(..., env="DEVELOPMENT_BOT_TOKEN")
@@ -39,10 +43,7 @@ class Settings(BaseSettings):
     mongo_port: int = Field(27017, env="MONGO_PORT")
     validation_schema_path: str = Field(None, env="VALIDATION_SCHEMA_PATH")
     model_config = SettingsConfigDict(
-        extra="allow",
-        env_file=".env",
-        env_file_encoding="utf-8",
-        frozen=True
+        extra="allow", env_file=".env", env_file_encoding="utf-8", frozen=True
     )
 
     def get_bot_token(self):
@@ -67,7 +68,7 @@ class Settings(BaseSettings):
             Tables.WEB_CONTENT: Settings().web_content_table_link,
             Tables.WEB_AI_CONTENT: Settings().web_ai_content_table_link,
             Tables.SEO_CONTENT: Settings().seo_content_table_link,
-            Tables.BACKUP: Settings().backup_table_link
+            Tables.BACKUP: Settings().backup_table_link,
         }
         table_type = Tables[table.upper()]
         return table_links.get(table_type)

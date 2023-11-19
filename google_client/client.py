@@ -11,7 +11,8 @@ from googleapiclient.errors import HttpError
 
 from google_access_share_bot.bot_logging.admin_logging import \
     BotAdminLoggingHandler
-from google_access_share_bot.google_client.utils import generate_id, get_grid_range
+from google_access_share_bot.google_client.utils import (generate_id,
+                                                         get_grid_range)
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = [
@@ -24,7 +25,7 @@ class GoogleClient:
     def __init__(self, bot, chat_id):
         self.bot = bot
         self.chat_id = chat_id
-        self.logger = logging.getLogger("google_logger")
+        self.logger = logging.getLogger(__name__)
         self.setup_logger()
         self.drive_client, self.sheets_client = self.get_client()
 
@@ -81,6 +82,43 @@ class GoogleClient:
         except Exception as e:
             self.logger.error(f"Error sharing {link} access with {email}: {e}")
 
+    def get_permission_id(self, link: str, email: str) -> str | None:
+        """
+        Returns permission_id for document based on email
+
+        :param link: Link to the document
+        :param email: Email to search through
+        :return: The ID of the permission
+        """
+        permissions = (
+            self.drive_client.permissions()
+            .list(fileId=generate_id(link), fields="permissions(id, emailAddress)")
+            .execute()
+        )
+        for permission in permissions.get("permissions", []):
+            if permission.get("emailAddress", "") == email:
+                return permission.get("id")
+        return None
+
+    def remove_access(self, link: str, permission_id: str) -> None:
+        """
+        Removes permission from document
+
+        :param link: Link to the document
+        :param permission_id: The ID of the permission
+        :return: None
+        """
+        command = self.drive_client.permissions().delete(
+            fileId=generate_id(link), permissionId=permission_id
+        )
+        try:
+            command.execute()
+            self.logger.info(f"Removed access from user")
+        except Exception as e:
+            self.logger.error(
+                f"Error deleting permission: {permission_id} from document: {link}, error: {e}"
+            )
+
     def clean_spreadsheet(self, link):
         """
         Receives spreadsheet object using drive client.
@@ -97,7 +135,7 @@ class GoogleClient:
         for sheet in spreadsheet["sheets"]:
             sheet_name = sheet.get("properties", {}).get("title")
             sheet_id = sheet.get("properties", {}).get("sheetId")
-            # TODO take list names to exclude from .env
+            # TODO take list names to exclude from button
             if sheet_name.lower() in ["Tasks", "Косяки", "инфа об авторах"]:
                 continue
 

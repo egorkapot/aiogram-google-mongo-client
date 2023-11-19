@@ -1,11 +1,12 @@
-from aiogram import Router, F
-from aiogram.filters import Command
-from aiogram.types import Message, ReplyKeyboardRemove
-from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
-from aiogram import Bot
-from google_access_share_bot.utils.utils import setup_logger
 import logging
+
+from aiogram import Bot, F, Router
+from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.types import Message, ReplyKeyboardRemove
+
+from google_access_share_bot.utils.utils import setup_logger
 
 
 class MeRouter(Router):
@@ -13,7 +14,7 @@ class MeRouter(Router):
         super().__init__()
         self.message.register(self.cmd_me, Command("me"))
 
-    async def cmd_me(self, message: Message, state:FSMContext):
+    async def cmd_me(self, message: Message, state: FSMContext):
         """Get user information"""
         await state.clear()
         user_id = message.from_user.id
@@ -26,5 +27,3 @@ class MeRouter(Router):
         response += f"Last Name: {last_name}\n"
         response += f"Username: @{username}"
         await message.answer(response)
-
-

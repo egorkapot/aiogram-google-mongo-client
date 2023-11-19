@@ -45,7 +45,7 @@ def is_google_email(email: str) -> bool:
     if not email_pattern.fullmatch(email):
         return False
 
-    domain = email.split('@')[1].lower()
+    domain = email.split("@")[1].lower()
 
     # Check if the domain is gmail.com or your custom Google Workspace domain
     return domain in ["gmail.com", "biggiko.com", "alreadymedia.com"]

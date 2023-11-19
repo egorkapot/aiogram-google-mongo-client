@@ -1,5 +1,6 @@
-import logging
 import asyncio
+import logging
+
 from aiogram import Bot
 
 
@@ -19,4 +20,3 @@ class BotUserLoggingHandler(logging.Handler):
 
     async def async_emit(self, log_entry: str) -> None:
         await self.bot.send_message(self.user_chat_id, log_entry)
-
