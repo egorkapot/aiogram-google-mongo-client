@@ -14,7 +14,8 @@ class CancelRouter(Router):
         super().__init__()
         self.message.register(self.cmd_cancel, Command("cancel"))
 
-    async def cmd_cancel(self, message: Message, state: FSMContext):
+    @staticmethod
+    async def cmd_cancel(message: Message, state: FSMContext):
         await state.clear()
         await message.answer(
             text="Action was cancelled. You can start again using /start command or others",

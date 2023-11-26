@@ -19,6 +19,7 @@ from google_access_share_bot.handlers.cmd_delete import DeleteRouter
 from google_access_share_bot.handlers.cmd_me import MeRouter
 from google_access_share_bot.handlers.cmd_start import RegistrationRouter
 from google_access_share_bot.mongo_client.client import MongoUsersClient
+from google_access_share_bot.handlers.reply_button_handlers import ButtonHandlerRouter
 from settings import Settings
 
 settings = Settings()
@@ -30,10 +31,11 @@ google_client = GoogleClient(bot, author_chat_id)
 MONGO_HOST = settings.mongo_host
 MONGO_PORT = settings.mongo_port
 mongo_client = MongoUsersClient(bot, author_chat_id, MONGO_HOST, MONGO_PORT, "db")
-start_router = RegistrationRouter(bot, mongo_client, author_chat_id)
 cancel_router = CancelRouter()
 me_router = MeRouter()
 delete_router = DeleteRouter(bot, mongo_client, google_client)
+button_handler_router = ButtonHandlerRouter(bot, mongo_client, google_client)
+start_router = RegistrationRouter(bot, mongo_client, author_chat_id)
 
 
 async def main() -> None:
@@ -44,7 +46,13 @@ async def main() -> None:
     regardless of the FSM state they're in
     :return: None
     """
-    dp.include_routers(cancel_router, delete_router, me_router, start_router)
+    dp.include_routers(
+        cancel_router,
+        me_router,
+        delete_router,
+        button_handler_router,
+        start_router
+    )
     await dp.start_polling(bot)
 
 

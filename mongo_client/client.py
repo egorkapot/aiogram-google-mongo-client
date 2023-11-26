@@ -40,7 +40,7 @@ class MongoUsersClient:
 
         self.db.command({"collMod": "users", "validator": validation_schema})
 
-    def get_user_data(self, value: int | str, filter_="_id") -> dict | None:
+    def get_user_data(self, value: int | str, filter_: str = "_id") -> dict | None:
         """
         Returns all the data about the user.
         By default, searches by _id
@@ -52,7 +52,7 @@ class MongoUsersClient:
         user_data = self.users_collection.find_one({filter_: value})
         return user_data
 
-    def get_username(self, value: int | str, filter_="_id") -> str | None:
+    def get_username(self, value: int | str, filter_: str = "_id") -> str | None:
         """
         Returns the username of specific user
 
@@ -90,7 +90,7 @@ class MongoUsersClient:
                 f"Error registering {user_id} with username: {data_.get('Username')} - {e}"
             )
 
-    def delete_user(self, value: int | str, filter_="_id"):
+    def delete_user(self, value: int | str, filter_: str = "_id"):
         """
         Deletes user from users_collection
 

@@ -17,7 +17,7 @@ class ReplyButtons:
         :return:
         """
         return ReplyKeyboardMarkup(
-            resize_keyboard=True, keyboard=[[cls._all_links], [cls._open_access]]
+            resize_keyboard=True, keyboard=[[cls._open_access], [cls._all_links, cls._change_email]]
         )
 
     @classmethod
@@ -28,7 +28,7 @@ class ReplyButtons:
         :return:
         """
         return ReplyKeyboardMarkup(
-            resize_keyboard=True, keyboard=[[cls._all_links], [cls._open_access]]
+            resize_keyboard=True, keyboard=[[cls._open_access], [cls._all_links, cls._change_email]]
         )
 
     @classmethod
@@ -69,12 +69,10 @@ class InlineButtons:
     link_to_guide_ = InlineKeyboardButton(
         text="Link to Guide", callback_data="table_link_to_guide"
     )
+    working_tables_markup = [web_content_table_, web_ai_table_, seo_content_table_]
     all_link_markup = [
-        web_content_table_,
-        web_ai_table_,
-        seo_content_table_,
-        backup_table_,
-        link_to_guide_,
+        [web_content_table_, web_ai_table_, seo_content_table_],
+        [backup_table_, link_to_guide_]
     ]
     confirm_button = InlineKeyboardButton(
         text="Confirm Selection ✅", callback_data="confirm"
@@ -88,7 +86,7 @@ class InlineButtons:
 
         :return: Instance of InlineKeyboardMarkup
         """
-        return InlineKeyboardMarkup(inline_keyboard=[cls.all_link_markup])
+        return InlineKeyboardMarkup(inline_keyboard=cls.all_link_markup)
 
     @classmethod
     def user_markup(cls) -> InlineKeyboardMarkup:
@@ -130,8 +128,8 @@ class InlineButtons:
         """
         Generates the markup for author with the callback buttons where to accept the registration or not
 
-        :param user_id: id of user to send to callback handler
-        :return: markup of keyboard buttons
+        :param user_id: ID of user to send to callback handler
+        :return: Markup of keyboard buttons
         """
         _yes = InlineKeyboardButton(text="✅", callback_data=f"approve_{user_id}")
         _no = InlineKeyboardButton(text="⛔", callback_data=f"deny_{user_id}")

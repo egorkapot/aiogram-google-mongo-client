@@ -54,7 +54,7 @@ class RegistrationRouter(Router):
 
         :param message: Message from user
         :param state: Current state of user
-        :return:
+        :return: None
         """
         await state.clear()
         user_id_ = message.from_user.id

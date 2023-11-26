@@ -97,7 +97,7 @@ class DeleteRouter(Router):
                 "Keep in mind that you will need to delete his list manually",
                 reply_markup=inline_buttons.generate_markup(
                     [
-                        inline_buttons.table_link_markup,
+                        inline_buttons.working_tables_markup,
                         [inline_buttons.confirm_button, inline_buttons.skip_button],
                     ]
                 ),

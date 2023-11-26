@@ -67,20 +67,23 @@ class GoogleClient:
             self.logger.error(f"An error occurred: {error}")
             raise error
 
-    def share_access(self, link, email):
+    #TODO update
+    def share_access(self, link: list[str], email):
         """Generates the id of the document and gives the permissions to provided email"""
+        batch = self.drive_client.
         user_permission = {"type": "user", "role": "writer", "emailAddress": email}
-        file_id = generate_id(link)
-        command = self.drive_client.permissions().create(
-            fileId=file_id,
-            body=user_permission,
-            fields="id",
-        )
-        try:
-            command.execute()
-            self.logger.info(f"Sharing the {link} to {email}")
-        except Exception as e:
-            self.logger.error(f"Error sharing {link} access with {email}: {e}")
+        for link in link:
+            file_id = generate_id(link)
+            command = self.drive_client.permissions().create(
+                fileId=file_id,
+                body=user_permission,
+                fields="id",
+            )
+            try:
+                command.execute()
+                self.logger.info(f"Sharing the {link} to {email}")
+            except Exception as e:
+                self.logger.error(f"Error sharing {link} access with {email}: {e}")
 
     def get_permission_id(self, link: str, email: str) -> str | None:
         """

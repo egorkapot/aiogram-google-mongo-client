@@ -18,6 +18,7 @@ class Tables(Enum):
     WEB_AI_CONTENT = "web_ai_content"
     SEO_CONTENT = "seo_content"
     BACKUP = "backup"
+    LINK_TO_GUIDE = "link_to_guide"
 
 
 @singleton
@@ -69,6 +70,7 @@ class Settings(BaseSettings):
             Tables.WEB_AI_CONTENT: Settings().web_ai_content_table_link,
             Tables.SEO_CONTENT: Settings().seo_content_table_link,
             Tables.BACKUP: Settings().backup_table_link,
+            Tables.LINK_TO_GUIDE: Settings().guide_link
         }
         table_type = Tables[table.upper()]
         return table_links.get(table_type)
