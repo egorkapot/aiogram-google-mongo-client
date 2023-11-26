@@ -1,20 +1,29 @@
 import re
 
+from google_access_share_bot.exceptions.exceptions import BaseUtilsException
 
-def is_google_document(link):
+def is_google_document(link:str):
     """Validates that the link is a document"""
+    if not isinstance(link, str):
+        raise BaseUtilsException("Link should be string")
     pattern = r"(https://docs.google.com/document/d/)([a-zA-Z0-9-_]+)"
     return bool(re.match(pattern, link))
 
 
-def is_google_spreadsheet(link):
+def is_google_spreadsheet(link: str):
     """Validates that the link is spreadsheet"""
+
+    if not isinstance(link, str):
+        raise BaseUtilsException("Link should be string")
     pattern = r"(https://docs.google.com/spreadsheets/d/)([a-zA-Z0-9-_]+)"
     return bool(re.match(pattern, link))
 
 
-def generate_id(link):
+def generate_id(link: str):
     """Generates the id of the file from link to open the access"""
+    if not isinstance(link, str):
+        raise BaseUtilsException("Link should be string")
+
     pattern = r"(https://docs.google.com/[^/]+/d/)([a-zA-Z0-9-_]+)"
     match = re.match(pattern, link)
     if match:

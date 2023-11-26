@@ -6,3 +6,11 @@ class InvalidRoleError(Exception):
 
 class MissingEnvironmentVariableException(Exception):
     pass
+
+
+class _BaseException(Exception):
+    def __init__(self, message: str):
+        self.message = message
+
+class BaseUtilsException(_BaseException):
+    pass

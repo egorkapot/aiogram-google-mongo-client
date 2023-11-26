@@ -8,7 +8,7 @@ from aiogram.types import CallbackQuery, Message
 
 from google_access_share_bot.bot_package.buttons import (inline_buttons,
                                                          reply_buttons)
-from google_access_share_bot.google_client.client import GoogleClient
+from google_access_share_bot.google_client.client import GoogleClient, GoogleClientException
 from google_access_share_bot.mongo_client.client import MongoUsersClient
 from google_access_share_bot.settings import settings
 from google_access_share_bot.utils.utils import setup_logger
@@ -38,7 +38,10 @@ class DeleteRouter(Router):
         self.logger = logging.getLogger(__name__)
         setup_logger(self.logger, self.bot, settings.author_chat_id)
         self.message.register(self.cmd_delete, Command("delete"))
-        self.message.register(self.validate_user_name, DeleteStates.asked_for_user_name)
+        self.message.register(
+            self.validate_user_name,
+            DeleteStates.asked_for_user_name
+        )
         self.callback_query.register(
             self.handle_table_button_click,
             F.data.startswith("table_"),
@@ -207,7 +210,11 @@ class DeleteRouter(Router):
         user_to_delete = userdata.get("user_to_delete")
         selected_tables = []
         for table, link in table_links.items():
-            permission_id = self.google_client.get_permission_id(link, email)
+            try:
+                permission_id = self.google_client.get_permission_id(link, email)
+            except GoogleClientException as e:
+                self.logger.error(e)
+                return
             if permission_id:
                 selected_tables.append(table)
                 self.google_client.remove_access(link, permission_id)

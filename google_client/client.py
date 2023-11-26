@@ -8,11 +8,16 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from googleapiclient.http import BatchHttpRequest
+from google_access_share_bot.exceptions.exceptions import BaseUtilsException
+
 
 from google_access_share_bot.bot_logging.admin_logging import \
     BotAdminLoggingHandler
 from google_access_share_bot.google_client.utils import (generate_id,
                                                          get_grid_range)
+from google_access_share_bot.exceptions.exceptions import _BaseException
+
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = [
@@ -20,6 +25,8 @@ SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
 ]
 
+class GoogleClientException(_BaseException):
+    pass
 
 class GoogleClient:
     def __init__(self, bot, chat_id):
@@ -65,25 +72,23 @@ class GoogleClient:
             return drive_service, sheets_service
         except HttpError as error:
             self.logger.error(f"An error occurred: {error}")
-            raise error
+            raise GoogleClientException(error) from error
 
     #TODO update
-    def share_access(self, link: list[str], email):
+    def share_access(self, links: list[str], email):
         """Generates the id of the document and gives the permissions to provided email"""
-        batch = self.drive_client.
+        batch = BatchHttpRequest(callback=self.callback)
         user_permission = {"type": "user", "role": "writer", "emailAddress": email}
-        for link in link:
+        for link in links:
             file_id = generate_id(link)
-            command = self.drive_client.permissions().create(
+            batch.add(self.drive_client.permissions().create(
                 fileId=file_id,
                 body=user_permission,
                 fields="id",
             )
-            try:
-                command.execute()
-                self.logger.info(f"Sharing the {link} to {email}")
-            except Exception as e:
-                self.logger.error(f"Error sharing {link} access with {email}: {e}")
+                    )
+        batch.execute()
+
 
     def get_permission_id(self, link: str, email: str) -> str | None:
         """
@@ -93,11 +98,15 @@ class GoogleClient:
         :param email: Email to search through
         :return: The ID of the permission
         """
-        permissions = (
-            self.drive_client.permissions()
-            .list(fileId=generate_id(link), fields="permissions(id, emailAddress)")
-            .execute()
-        )
+        try:
+            generated_id = generate_id(link)
+        except BaseUtilsException as e:
+            raise GoogleClientException(f"{e}") from e
+
+        permissions = self.drive_client.permissions().list(
+            fileId=generated_id,
+            fields="permissions(id, emailAddress)"
+        ).execute()
         for permission in permissions.get("permissions", []):
             if permission.get("emailAddress", "") == email:
                 return permission.get("id")
@@ -121,6 +130,7 @@ class GoogleClient:
             self.logger.error(
                 f"Error deleting permission: {permission_id} from document: {link}, error: {e}"
             )
+            raise GoogleClientException(f""str(e)) from e
 
     def clean_spreadsheet(self, link):
         """
@@ -176,3 +186,11 @@ class GoogleClient:
                 .execute()
             )
             return response
+
+    def callback(self, request_id, response, exception):
+        if exception is not None:
+            # Handle error
+            self.logger.error(f"Request {request_id} failed: {exception}")
+        else:
+            # Handle successful response
+            self.logger.info(f"Response from request {request_id}: {response}")
