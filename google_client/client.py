@@ -1,5 +1,5 @@
 from __future__ import print_function
-
+import re
 import logging
 import os.path
 
@@ -9,13 +9,9 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import BatchHttpRequest
-from google_access_share_bot.exceptions.exceptions import BaseUtilsException
-
 
 from google_access_share_bot.bot_logging.admin_logging import \
     BotAdminLoggingHandler
-from google_access_share_bot.google_client.utils import (generate_id,
-                                                         get_grid_range)
 from google_access_share_bot.exceptions.exceptions import _BaseException
 
 
@@ -25,8 +21,10 @@ SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
 ]
 
+
 class GoogleClientException(_BaseException):
-    pass
+    pass #TODO only pass?
+
 
 class GoogleClient:
     def __init__(self, bot, chat_id):
@@ -72,7 +70,7 @@ class GoogleClient:
             return drive_service, sheets_service
         except HttpError as error:
             self.logger.error(f"An error occurred: {error}")
-            raise GoogleClientException(error) from error
+            raise GoogleClientException(str(error)) from error
 
     #TODO update
     def share_access(self, links: list[str], email):
@@ -80,7 +78,7 @@ class GoogleClient:
         batch = BatchHttpRequest(callback=self.callback)
         user_permission = {"type": "user", "role": "writer", "emailAddress": email}
         for link in links:
-            file_id = generate_id(link)
+            file_id = self.generate_id(link)
             batch.add(self.drive_client.permissions().create(
                 fileId=file_id,
                 body=user_permission,
@@ -88,7 +86,6 @@ class GoogleClient:
             )
                     )
         batch.execute()
-
 
     def get_permission_id(self, link: str, email: str) -> str | None:
         """
@@ -99,10 +96,10 @@ class GoogleClient:
         :return: The ID of the permission
         """
         try:
-            generated_id = generate_id(link)
-        except BaseUtilsException as e:
-            raise GoogleClientException(f"{e}") from e
-
+            generated_id = self.generate_id(link)
+        except GoogleClientException as e:
+            self.logger.error(f"Error while generating ID: {e}")
+            return
         permissions = self.drive_client.permissions().list(
             fileId=generated_id,
             fields="permissions(id, emailAddress)"
@@ -121,16 +118,10 @@ class GoogleClient:
         :return: None
         """
         command = self.drive_client.permissions().delete(
-            fileId=generate_id(link), permissionId=permission_id
+            fileId=self.generate_id(link), permissionId=permission_id
         )
-        try:
-            command.execute()
-            self.logger.info(f"Removed access from user")
-        except Exception as e:
-            self.logger.error(
-                f"Error deleting permission: {permission_id} from document: {link}, error: {e}"
-            )
-            raise GoogleClientException(f""str(e)) from e
+        command.execute()
+        self.logger.info(f"Removed access from user")
 
     def clean_spreadsheet(self, link):
         """
@@ -138,7 +129,7 @@ class GoogleClient:
         For each sheet of spreadsheet cleans the range in updateCells and highlights in white in repeatCell.
         All these updates are stored in requests list and send to batchUpdate function to execute at once
         """
-        spreadsheet_id = generate_id(link)
+        spreadsheet_id = self.generate_id(link)
         spreadsheet = (
             self.sheets_client.spreadsheets()
             .get(spreadsheetId=spreadsheet_id)
@@ -155,7 +146,7 @@ class GoogleClient:
             requests.append(
                 {
                     "updateCells": {
-                        "range": get_grid_range(sheet_id, 1, 1000, 3, 26),
+                        "range": self.get_grid_range(sheet_id, 1, 1000, 3, 26),
                         "fields": "userEnteredValue",
                     }
                 }
@@ -164,7 +155,7 @@ class GoogleClient:
             requests.append(
                 {
                     "repeatCell": {
-                        "range": get_grid_range(sheet_id, 1, 1000, 0, 26),
+                        "range": self.get_grid_range(sheet_id, 1, 1000, 0, 26),
                         "cell": {
                             "userEnteredFormat": {
                                 "backgroundColor": {
@@ -194,3 +185,56 @@ class GoogleClient:
         else:
             # Handle successful response
             self.logger.info(f"Response from request {request_id}: {response}")
+
+    def is_google_document(self, link: str):
+        """Validates that the link is a document"""
+        if not isinstance(link, str):
+            raise GoogleClientException("Link should be string")
+        pattern = r"(https://docs.google.com/document/d/)([a-zA-Z0-9-_]+)"
+        return bool(re.match(pattern, link))
+
+    def is_google_spreadsheet(self, link: str):
+        """Validates that the link is spreadsheet"""
+
+        if not isinstance(link, str):
+            raise GoogleClientException("Link should be string")
+        pattern = r"(https://docs.google.com/spreadsheets/d/)([a-zA-Z0-9-_]+)"
+        return bool(re.match(pattern, link))
+
+    def generate_id(self, link: str) -> str:
+        """Generates the id of the file from link to open the access"""
+        if not isinstance(link, str):
+            raise GoogleClientException("Link should be string")
+
+        pattern = r"(https://docs.google.com/[^/]+/d/)([a-zA-Z0-9-_]+)"
+        match = re.match(pattern, link)
+        if match:
+            file_id = match.group(2)
+            return file_id
+
+    def get_grid_range(self, sheet_id, start_row, end_row, start_col, end_col):
+        """Returns a GridRange object for batch updates."""
+        return {
+            "sheetId": sheet_id,
+            "startRowIndex": start_row,
+            "endRowIndex": end_row,
+            "startColumnIndex": start_col,
+            "endColumnIndex": end_col,
+        }
+
+    def is_google_email(self, email: str) -> bool:
+        """
+        Validates if the provided email is a Google email.
+
+        :param email: email to validate
+        :return: bool
+        """
+        email_pattern = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
+
+        if not email_pattern.fullmatch(email):
+            return False
+
+        domain = email.split("@")[1].lower()
+
+        # Check if the domain is gmail.com or your custom Google Workspace domain
+        return domain in ["gmail.com", "biggiko.com", "alreadymedia.com"]
