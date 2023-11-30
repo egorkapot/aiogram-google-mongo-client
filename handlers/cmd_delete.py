@@ -37,7 +37,10 @@ class DeleteRouter(Router):
         self.google_client = google_client
         self.logger = logging.getLogger(__name__)
         setup_logger(self.logger, self.bot, settings.author_chat_id)
-        self.message.register(self.cmd_delete, Command("delete"))
+        self.message.register(
+            self.cmd_delete,
+            Command("delete")
+        )
         self.message.register(
             self.validate_user_name,
             DeleteStates.asked_for_user_name
@@ -58,7 +61,9 @@ class DeleteRouter(Router):
             DeleteStates.choosing_table_links,
         )
         self.callback_query.register(
-            self.delete_user, F.data == "confirm", DeleteStates.confirming_selection
+            self.delete_user,
+            F.data == "confirm",
+            DeleteStates.confirming_selection
         )
 
     async def cmd_delete(self, message: Message, state: FSMContext):

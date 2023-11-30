@@ -12,8 +12,7 @@ from google_access_share_bot.bot_logging.user_logging import \
     BotUserLoggingHandler
 from google_access_share_bot.bot_package.buttons import *
 from google_access_share_bot.google_client.client import GoogleClient
-from google_access_share_bot.google_client.utils import (is_google_document,
-                                                         is_google_spreadsheet)
+
 from google_access_share_bot.handlers.cmd_cancel import CancelRouter
 from google_access_share_bot.handlers.cmd_delete import DeleteRouter
 from google_access_share_bot.handlers.cmd_me import MeRouter
