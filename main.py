@@ -1,35 +1,22 @@
 import asyncio
-import logging
-import os
 
-from aiogram import Bot, Dispatcher, F, Router
-from aiogram.filters import Command
+from aiogram import Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import Message
-from googleapiclient.errors import HttpError
 
-from google_access_share_bot.bot_logging.user_logging import \
-    BotUserLoggingHandler
-from google_access_share_bot.bot_package.buttons import *
-from google_access_share_bot.google_client.client import GoogleClient
+from google_access_share_bot.client.google_client.client import GoogleClient
 
-from google_access_share_bot.handlers.cmd_cancel import CancelRouter
-from google_access_share_bot.handlers.cmd_delete import DeleteRouter
-from google_access_share_bot.handlers.cmd_me import MeRouter
-from google_access_share_bot.handlers.cmd_start import RegistrationRouter
-from google_access_share_bot.mongo_client.client import MongoUsersClient
-from google_access_share_bot.handlers.reply_button_handlers import ButtonHandlerRouter
-from settings import Settings
+from google_access_share_bot.bot.handlers.cmd_cancel import CancelRouter
+from google_access_share_bot.bot.handlers.cmd_delete import DeleteRouter
+from google_access_share_bot.bot.handlers.cmd_me import MeRouter
+from google_access_share_bot.bot.handlers.cmd_start import RegistrationRouter
+from google_access_share_bot.client.mongo_client.client import mongo_client
+from google_access_share_bot.bot.bot import bot
+from google_access_share_bot.bot.handlers.reply_button_handlers import ButtonHandlerRouter
+from settings import settings
 
-settings = Settings()
-bot_token = settings.get_bot_token().get_secret_value()
 author_chat_id = settings.author_chat_id  # Chat id of creator for logging
-bot = Bot(bot_token)
 dp = Dispatcher(storage=MemoryStorage())
 google_client = GoogleClient(bot, author_chat_id)
-MONGO_HOST = settings.mongo_host
-MONGO_PORT = settings.mongo_port
-mongo_client = MongoUsersClient(bot, author_chat_id, MONGO_HOST, MONGO_PORT, "db")
 cancel_router = CancelRouter()
 me_router = MeRouter()
 delete_router = DeleteRouter(bot, mongo_client, google_client)

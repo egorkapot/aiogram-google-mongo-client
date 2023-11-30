@@ -3,8 +3,8 @@ import logging
 
 from aiogram import Bot
 from pymongo import MongoClient, ReturnDocument
-
-from google_access_share_bot.settings import Settings
+from google_access_share_bot.bot.bot import bot
+from google_access_share_bot.settings import settings
 from google_access_share_bot.utils.utils import setup_logger
 
 
@@ -35,7 +35,7 @@ class MongoUsersClient:
         """
         Set or update the validation schema for the users' collection.
         """
-        with open(Settings().validation_schema_path, "r") as file:
+        with open(settings.validation_schema_path, "r") as file:
             validation_schema = json.load(file)
 
         self.db.command({"collMod": "users", "validator": validation_schema})
@@ -122,3 +122,11 @@ class MongoUsersClient:
             return_document=ReturnDocument.BEFORE,
         )
         self.logger.info(f"Information about {username} was changed to {update}")
+
+
+MONGO_HOST = settings.mongo_host
+MONGO_PORT = settings.mongo_port
+author_chat_id = settings.author_chat_id
+mongo_client = MongoUsersClient(bot, author_chat_id, MONGO_HOST, MONGO_PORT, "db")
+
+

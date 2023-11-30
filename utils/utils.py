@@ -3,7 +3,7 @@ from logging import Logger
 
 from aiogram import Bot
 
-from google_access_share_bot.bot_logging.admin_logging import \
+from google_access_share_bot.bot.bot_logging import \
     BotAdminLoggingHandler
 
 

@@ -8,10 +8,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from googleapiclient.http import BatchHttpRequest
 from google_access_share_bot.utils.utils import setup_logger
-from google_access_share_bot.bot_logging.admin_logging import \
-    BotAdminLoggingHandler
 from google_access_share_bot.exceptions.exceptions import _BaseException
 
 

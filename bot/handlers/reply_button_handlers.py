@@ -1,16 +1,11 @@
-import logging
-
 from aiogram import Bot, F, Router
-from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
-from google_access_share_bot.bot_package.buttons import (inline_buttons,
-                                                         reply_buttons)
-from google_access_share_bot.mongo_client.client import MongoUsersClient
-from google_access_share_bot.google_client.client import GoogleClient
-from google_access_share_bot.utils.utils import setup_logger
+from google_access_share_bot.bot.bot_package.buttons import (inline_buttons)
+from google_access_share_bot.client.mongo_client.client import MongoUsersClient
+from google_access_share_bot.client.google_client.client import GoogleClient
 from google_access_share_bot.settings import settings
 
 
