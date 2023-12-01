@@ -3,12 +3,11 @@ from logging import Logger
 
 from aiogram import Bot
 
-from google_access_share_bot.bot.bot_logging import \
-    BotAdminLoggingHandler
+from google_access_share_bot.bot.bot_logging.admin_logging import BotAdminLoggingHandler
 
 
 def setup_logger(
-    logger: Logger, bot: Bot, author_chat_id: str, validation_level: int = logging.INFO
+    logger: Logger, bot: Bot, log_chat_id: str, validation_level: int = logging.INFO
 ) -> None:
     """
     Set up an instance of logger class
@@ -19,7 +18,7 @@ def setup_logger(
     :param validation_level: Logging level (e.g., logging.INFO, logging.DEBUG).
     :return: None
     """
-    handler = BotAdminLoggingHandler(bot, author_chat_id)
+    handler = BotAdminLoggingHandler(bot, log_chat_id)
     formatter = logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%y-%m-%d"
     )

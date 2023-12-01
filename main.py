@@ -3,10 +3,10 @@ import asyncio
 from aiogram import Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 
-from google_access_share_bot.client.google_client.client import GoogleClient
+from google_access_share_bot.client.google_client.client import google_client
 
 from google_access_share_bot.bot.handlers.cmd_cancel import CancelRouter
-from google_access_share_bot.bot.handlers.cmd_delete import DeleteRouter
+from google_access_share_bot.bot.handlers.admin_delete_button import DeleteRouter
 from google_access_share_bot.bot.handlers.cmd_me import MeRouter
 from google_access_share_bot.bot.handlers.cmd_start import RegistrationRouter
 from google_access_share_bot.client.mongo_client.client import mongo_client
@@ -16,7 +16,6 @@ from settings import settings
 
 author_chat_id = settings.author_chat_id  # Chat id of creator for logging
 dp = Dispatcher(storage=MemoryStorage())
-google_client = GoogleClient(bot, author_chat_id)
 cancel_router = CancelRouter()
 me_router = MeRouter()
 delete_router = DeleteRouter(bot, mongo_client, google_client)

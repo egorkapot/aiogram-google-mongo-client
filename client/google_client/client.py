@@ -10,7 +10,9 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from google_access_share_bot.utils.utils import setup_logger
 from google_access_share_bot.exceptions.exceptions import _BaseException
-
+from aiogram import Bot
+from google_access_share_bot.bot.bot import bot
+from google_access_share_bot.settings import settings
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = [
@@ -18,14 +20,16 @@ SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
 ]
 
+
 #TODO create instance inside module
 class GoogleClientException(_BaseException):
-    pass #TODO only pass?
+    pass
+    #TODO only pass?
 
 
 class GoogleClient:
-    def __init__(self, bot, chat_id):
-        self.bot = bot
+    def __init__(self, bot_: Bot, chat_id: str):
+        self.bot = bot_
         self.chat_id = chat_id
         self.logger = logging.getLogger(__name__)
         setup_logger(self.logger, self.bot, self.chat_id, logging.ERROR)
@@ -36,9 +40,9 @@ class GoogleClient:
         # The file token.json stores the user's access and refresh tokens, and is
         # created automatically when the authorization flow completes for the first
         # time.
-        if os.path.exists("google_client/token.json"):
+        if os.path.exists("client/google_client/token.json"):
             creds = Credentials.from_authorized_user_file(
-                "google_client/token.json", SCOPES
+                "client/google_client/token.json", SCOPES
             )
         # If there are no (valid) google_client available, let the user log in.
         if not creds or not creds.valid:
@@ -46,11 +50,11 @@ class GoogleClient:
                 creds.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
-                    "google_client/credentials.json", SCOPES
+                    "client/google_client/credentials.json", SCOPES
                 )
                 creds = flow.run_local_server(port=8000)
             # Save the google_client for the next run
-            with open("google_client/token.json", "w") as token:
+            with open("client/google_client/token.json", "w") as token:
                 token.write(creds.to_json())
         try:
             drive_service = build("drive", "v3", credentials=creds)
@@ -61,17 +65,27 @@ class GoogleClient:
             raise GoogleClientException(str(error)) from error
 
     #TODO update
-    def share_access(self, links: list[str], email):
-        """Generates the id of the document and gives the permissions to provided email"""
+    def share_access_to_document(self, links: list[str], email) -> None:
+        """
+        Validates that each link is Google document.
+        Generates the id of the document and gives the permissions to provided email
+
+        :param links: List of links
+        :param email: Email to open the access
+        :return: None
+        """
         batch = self.drive_client.new_batch_http_request(callback=self.callback)
         user_permission = {"type": "user", "role": "writer", "emailAddress": email}
         for link in links:
-            file_id = self.generate_id(link)
-            batch.add(self.drive_client.permissions().create(
-                fileId=file_id,
-                body=user_permission,
-                fields="id")
-                    )
+            if self.is_google_document(link):
+                file_id = self.generate_id(link)
+                batch.add(self.drive_client.permissions().create(
+                    fileId=file_id,
+                    body=user_permission,
+                    fields="id")
+                        )
+            else:
+                raise GoogleClientException(f"Link: {link} is not a google document!") #logger should send this message to user for each link
         batch.execute()
 
     def get_permission_id(self, link: str, email: str) -> str | None:
@@ -92,7 +106,7 @@ class GoogleClient:
             fields="permissions(id, emailAddress)"
         ).execute()
         for permission in permissions.get("permissions", []):
-            if permission.get("emailAddress", "") == email:
+            if permission.get("emailAddress", "").lower() == email:
                 return permission.get("id")
         return None
 
@@ -235,3 +249,7 @@ class GoogleClient:
         domain = email.split("@")[1].lower()
         # Check if the domain is gmail.com or your custom Google Workspace domain
         return domain in ["gmail.com", "biggiko.com", "alreadymedia.com"]
+
+
+author_chat_id = settings.author_chat_id
+google_client = GoogleClient(bot, author_chat_id)

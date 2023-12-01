@@ -5,9 +5,10 @@ from google_access_share_bot.exceptions.exceptions import InvalidRoleError
 
 
 class ReplyButtons:
-    _open_access = KeyboardButton(text="Open the access")
-    _change_email = KeyboardButton(text="Change my email")
-    _all_links = KeyboardButton(text="All Links")
+    open_access = KeyboardButton(text="Open the access")
+    change_email = KeyboardButton(text="Change my email")
+    all_links = KeyboardButton(text="All Links")
+    delete_user = KeyboardButton(text="Delete User")
 
     @classmethod
     def admin_markup(cls):
@@ -17,7 +18,7 @@ class ReplyButtons:
         :return:
         """
         return ReplyKeyboardMarkup(
-            resize_keyboard=True, keyboard=[[cls._open_access], [cls._all_links, cls._change_email]]
+            resize_keyboard=True, keyboard=[[cls.open_access], [cls.all_links, cls.change_email], [cls.delete_user]]
         )
 
     @classmethod
@@ -28,12 +29,12 @@ class ReplyButtons:
         :return:
         """
         return ReplyKeyboardMarkup(
-            resize_keyboard=True, keyboard=[[cls._open_access], [cls._all_links, cls._change_email]]
+            resize_keyboard=True, keyboard=[[cls.open_access], [cls.all_links, cls.change_email]]
         )
 
     @classmethod
     def biggiko_markup(cls):
-        return ReplyKeyboardMarkup(resize_keyboard=True, keyboard=[[cls._open_access]])
+        return ReplyKeyboardMarkup(resize_keyboard=True, keyboard=[[cls.open_access]])
 
     @classmethod
     def create_initial_markup(cls, role) -> ReplyKeyboardMarkup:

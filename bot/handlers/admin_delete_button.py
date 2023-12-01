@@ -1,7 +1,6 @@
 import logging
 
 from aiogram import Bot, F, Router
-from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
@@ -21,7 +20,7 @@ class DeleteStates(StatesGroup):
 
 class DeleteRouter(Router):
     def __init__(
-        self, bot: Bot, mongo_client: MongoUsersClient, google_client: GoogleClient
+        self, bot: Bot, mongo_client: MongoUsersClient, google_client: GoogleClient, log_chat_id: str
     ):
         """
         Initialisation of the Mongo client, bot instance to handle bot-specific
@@ -34,11 +33,12 @@ class DeleteRouter(Router):
         self.bot = bot
         self.mongo_client = mongo_client
         self.google_client = google_client
+        self.log_chat_id = log_chat_id
         self.logger = logging.getLogger(__name__)
-        setup_logger(self.logger, self.bot, settings.author_chat_id)
+        setup_logger(self.logger, self.bot, self.log_chat_id)
         self.message.register(
             self.cmd_delete,
-            Command("delete")
+            F.text == "Delete User"
         )
         self.message.register(
             self.validate_user_name,
@@ -75,7 +75,11 @@ class DeleteRouter(Router):
         """
         await state.clear()
         user_id_ = message.from_user.id
-        user_role_ = self.mongo_client.get_user_data(user_id_).get("role")
+        try:
+            user_role_ = self.mongo_client.get_user_data(user_id_).get("role")
+        except AttributeError as e:
+            await message.answer(f"You are not registered user!")
+            return
         if user_role_ == "admin":
             await state.set_state(DeleteStates.asked_for_user_name)
             await message.answer("Please provide telegram's username of user to delete")
@@ -213,19 +217,20 @@ class DeleteRouter(Router):
         email = userdata.get("email")
         user_to_delete = userdata.get("user_to_delete")
         selected_tables = []
-        for table, link in table_links.items():
-            try:
-                permission_id = self.google_client.get_permission_id(link, email)
-            except GoogleClientException as e:
-                self.logger.error(e)
-                return
-            if permission_id:
-                selected_tables.append(table)
-                self.google_client.remove_access(link, permission_id)
-            else:
-                await call.message.answer(
-                    f"Email: {email} is not present in {table} - {link}"
-                )
+        if table_links:
+            for table, link in table_links.items():
+                try:
+                    permission_id = self.google_client.get_permission_id(link, email)
+                except GoogleClientException as e:
+                    self.logger.error(e)
+                    return
+                if permission_id:
+                    selected_tables.append(table)
+                    self.google_client.remove_access(link, permission_id)
+                else:
+                    await call.message.answer(
+                        f"Email: {email} is not present in {table} - {link}"
+                    )
         self.mongo_client.delete_user(value=user_to_delete, filter_="username")
         selected_tables_text = ", ".join(selected_tables)
         if selected_tables_text:

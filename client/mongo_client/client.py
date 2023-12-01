@@ -49,7 +49,7 @@ class MongoUsersClient:
         :param value: Data to search in the database
         :return: User's data
         """
-        user_data = self.users_collection.find_one({filter_: value})
+        user_data = self.users_collection.find_one({filter_: value}) #TODO maybe wrap into exception
         return user_data
 
     def get_username(self, value: int | str, filter_: str = "_id") -> str | None:
