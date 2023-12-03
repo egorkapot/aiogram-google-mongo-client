@@ -106,7 +106,7 @@ class RegistrationRouter(Router):
         user_state = await state.get_data()
         self.mongo_client.add_user(user_id_, user_state)
         await self.bot.send_message(
-            self.author_chat_id,
+            self.log_chat_id,
             f"User with parameters:\n\n"
             f"name: {message.from_user.username}\n"
             f"id: {user_id_}\n"

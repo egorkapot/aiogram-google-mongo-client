@@ -18,8 +18,8 @@ author_chat_id = settings.author_chat_id  # Chat id of creator for logging
 dp = Dispatcher(storage=MemoryStorage())
 cancel_router = CancelRouter()
 me_router = MeRouter()
-delete_router = DeleteRouter(bot, mongo_client, google_client)
-button_handler_router = ButtonHandlerRouter(bot, mongo_client, google_client)
+delete_router = DeleteRouter(bot, mongo_client, google_client, author_chat_id)
+button_handler_router = ButtonHandlerRouter(bot, mongo_client, google_client, author_chat_id)
 start_router = RegistrationRouter(bot, mongo_client, author_chat_id)
 
 

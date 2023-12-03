@@ -60,6 +60,11 @@ class DeleteRouter(Router):
             DeleteStates.choosing_table_links,
         )
         self.callback_query.register(
+            self.deny_selection,
+            F.data == "deny",
+            DeleteStates.confirming_selection
+        )
+        self.callback_query.register(
             self.delete_user,
             F.data == "confirm",
             DeleteStates.confirming_selection
@@ -163,13 +168,13 @@ class DeleteRouter(Router):
             f"Please confirm the deletion of the following user:\n\n"
             f"Username: {userdata.get('user_to_delete')}\n\n",
             reply_markup=inline_buttons.generate_markup(
-                [[inline_buttons.confirm_button]]
+                [[inline_buttons.confirm_button, inline_buttons.deny_button]]
             ),
         )
         await state.set_state(DeleteStates.confirming_selection)
 
     @staticmethod
-    async def confirm_table_selection(call: CallbackQuery, state: FSMContext):
+    async def confirm_table_selection(call: CallbackQuery, state: FSMContext) -> None:
         """
         Triggered after user confirms the selection of tables.
         Send the information about the user to delete and list of selected tables.
@@ -177,7 +182,7 @@ class DeleteRouter(Router):
 
         :param call: Call from markup
         :param state: Current state of user
-        :return:
+        :return: None
         """
         userdata = await state.get_data()
         selected_tables = userdata.get("selected_tables", [])
@@ -201,6 +206,17 @@ class DeleteRouter(Router):
             ),
         )
         await state.set_state(DeleteStates.confirming_selection)
+
+    async def deny_selection(self, call: CallbackQuery, state: FSMContext) -> None:
+        """
+        Denies the deletion of user
+
+        :param call: Call from markup
+        :param state: Current state of user
+        :return: None
+        """
+        await call.message.edit_text("You have denied the deletion of user")
+        await state.clear()
 
     async def delete_user(self, call: CallbackQuery, state: FSMContext) -> None:
         """

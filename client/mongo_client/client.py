@@ -29,7 +29,7 @@ class MongoUsersClient:
         self.chat_id = chat_id
         self.logger = logging.getLogger(__name__)
         self.set_validation_schema()
-        setup_logger(self.logger, self.bot, self.chat_id, logging.ERROR)
+        setup_logger(self.logger, self.bot, self.chat_id, logging.WARNING)
 
     def set_validation_schema(self):
         """
@@ -121,7 +121,7 @@ class MongoUsersClient:
             upsert=upsert,
             return_document=ReturnDocument.BEFORE,
         )
-        self.logger.info(f"Information about {username} was changed to {update}")
+        self.logger.warning(f"Information about {username} was changed to {update}")
 
 
 MONGO_HOST = settings.mongo_host

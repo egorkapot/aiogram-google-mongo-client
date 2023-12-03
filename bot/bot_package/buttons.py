@@ -11,29 +11,36 @@ class ReplyButtons:
     delete_user = KeyboardButton(text="Delete User")
 
     @classmethod
-    def admin_markup(cls):
+    def admin_markup(cls) -> ReplyKeyboardMarkup:
         """
-        Returns markup for admin.
+        Returns markup for admin role.
         Keep in mind that all_links for admin and user are different
-        :return:
+
+        :return: Instance of ReplyKeyboardMarkup
         """
         return ReplyKeyboardMarkup(
             resize_keyboard=True, keyboard=[[cls.open_access], [cls.all_links, cls.change_email], [cls.delete_user]]
         )
 
     @classmethod
-    def user_markup(cls):
+    def user_markup(cls) -> ReplyKeyboardMarkup:
         """
-        Returns markup for user.
+        Returns markup for user role.
         Keep in mind that all_links for admin and user are different
-        :return:
+
+        :return: Instance of ReplyKeyboardMarkup
         """
         return ReplyKeyboardMarkup(
             resize_keyboard=True, keyboard=[[cls.open_access], [cls.all_links, cls.change_email]]
         )
 
     @classmethod
-    def biggiko_markup(cls):
+    def biggiko_markup(cls) -> ReplyKeyboardMarkup:
+        """
+        Returns markup for biggiko role.
+
+        :return: Instance of ReplyKeyboardMarkup
+        """
         return ReplyKeyboardMarkup(resize_keyboard=True, keyboard=[[cls.open_access]])
 
     @classmethod
@@ -76,7 +83,10 @@ class InlineButtons:
         [backup_table_, link_to_guide_]
     ]
     confirm_button = InlineKeyboardButton(
-        text="Confirm Selection ✅", callback_data="confirm"
+        text="Confirm ✅", callback_data="confirm"
+    )
+    deny_button = InlineKeyboardButton(
+        text="Deny ❌", callback_data="deny"
     )
     skip_button = InlineKeyboardButton(text="Skip ⏩", callback_data="skip")
 

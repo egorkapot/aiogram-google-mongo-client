@@ -64,7 +64,6 @@ class GoogleClient:
             self.logger.error(f"An error occurred: {error}")
             raise GoogleClientException(str(error)) from error
 
-    #TODO update
     def share_access_to_document(self, links: list[str], email) -> None:
         """
         Validates that each link is Google document.
@@ -77,15 +76,12 @@ class GoogleClient:
         batch = self.drive_client.new_batch_http_request(callback=self.callback)
         user_permission = {"type": "user", "role": "writer", "emailAddress": email}
         for link in links:
-            if self.is_google_document(link):
-                file_id = self.generate_id(link)
-                batch.add(self.drive_client.permissions().create(
-                    fileId=file_id,
-                    body=user_permission,
-                    fields="id")
-                        )
-            else:
-                raise GoogleClientException(f"Link: {link} is not a google document!") #logger should send this message to user for each link
+            file_id = self.generate_id(link)
+            batch.add(self.drive_client.permissions().create(
+                fileId=file_id,
+                body=user_permission,
+                fields="id")
+                    )
         batch.execute()
 
     def get_permission_id(self, link: str, email: str) -> str | None:
