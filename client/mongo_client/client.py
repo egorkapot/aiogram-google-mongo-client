@@ -40,6 +40,19 @@ class MongoUsersClient:
 
         self.db.command({"collMod": "users", "validator": validation_schema})
 
+    def get_data(self, query: dict, *args) -> list:
+        """
+        Query MongoDB
+
+        :param query: Query to be sent to MongoDB
+        :param args: Query arguments
+        :return: List containing MongoDB data
+        """
+        documents = []
+        for document in self.users_collection.find(query, *args):
+            documents.append(document)
+        return documents
+
     def get_user_data(self, value: int | str, filter_: str = "_id") -> dict | None:
         """
         Returns all the data about the user.

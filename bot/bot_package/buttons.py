@@ -9,6 +9,7 @@ class ReplyButtons:
     change_email = KeyboardButton(text="Change my email")
     all_links = KeyboardButton(text="All Links")
     delete_user = KeyboardButton(text="Delete User")
+    clean_table = KeyboardButton(text="Clean Table")
 
     @classmethod
     def admin_markup(cls) -> ReplyKeyboardMarkup:
@@ -19,7 +20,9 @@ class ReplyButtons:
         :return: Instance of ReplyKeyboardMarkup
         """
         return ReplyKeyboardMarkup(
-            resize_keyboard=True, keyboard=[[cls.open_access], [cls.all_links, cls.change_email], [cls.delete_user]]
+            resize_keyboard=True, keyboard=[
+                [cls.open_access], [cls.all_links, cls.change_email], [cls.delete_user, cls.clean_table]
+            ]
         )
 
     @classmethod

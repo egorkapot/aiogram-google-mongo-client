@@ -1,4 +1,5 @@
 import logging
+import re
 
 from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
@@ -86,8 +87,18 @@ class DeleteRouter(Router):
             await message.answer(f"You are not registered user!")
             return
         if user_role_ == "admin":
+            userdata = self.mongo_client.get_data({}, {"username": 1, "email": 1, "_id": 0})
+            print(userdata)
+            userdata_text = (
+                "\n\n".join(
+                            f"{index}. "
+                            f"Username: {userdata_['username']}, "
+                            f"Email: {userdata_['email']}" for index, userdata_ in enumerate(userdata, start=1)
+                            )
+            )
             await state.set_state(DeleteStates.asked_for_user_name)
-            await message.answer("Please provide telegram's username of user to delete")
+            await message.answer(f"<b>Current users are</b>: \n\n{userdata_text}\n\n"
+                                 f"\n<b>Please provide telegram's username of user to delete</b>", parse_mode="HTML")
         else:
             await message.answer("Prohibited to use admins command")
             self.logger.info(
@@ -102,7 +113,7 @@ class DeleteRouter(Router):
         :param state: Current state of user
         :return:
         """
-        user_to_delete_ = message.text.lower().split("@")[1]
+        user_to_delete_ = message.text.lower()
         userdata = self.mongo_client.get_user_data(user_to_delete_, filter_="username")
         if userdata:
             await state.update_data(user_to_delete=user_to_delete_)
@@ -250,11 +261,11 @@ class DeleteRouter(Router):
         self.mongo_client.delete_user(value=user_to_delete, filter_="username")
         selected_tables_text = ", ".join(selected_tables)
         if selected_tables_text:
-            await call.message.answer(
+            await call.message.edit_text(
                 f"User: @{user_to_delete} was deleted from the database"
                 f" and the following tables: \n\n {selected_tables_text}"
             )
         else:
-            await call.message.answer(
+            await call.message.edit_text(
                 f"User: @{user_to_delete} was deleted from database but was not matched with tables to delete from"
             )
