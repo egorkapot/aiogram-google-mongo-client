@@ -1,12 +1,15 @@
+import logging
+import re
+
 from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
-import logging
-import re
-from google_access_share_bot.bot.bot_package.buttons import (inline_buttons)
+
+from google_access_share_bot.bot.bot_package.buttons import inline_buttons
+from google_access_share_bot.client.google_client.client import (
+    GoogleClient, GoogleClientException)
 from google_access_share_bot.client.mongo_client.client import MongoUsersClient
-from google_access_share_bot.client.google_client.client import GoogleClient, GoogleClientException
 from google_access_share_bot.settings import settings
 from google_access_share_bot.utils.utils import setup_logger
 
@@ -17,9 +20,14 @@ class ButtonHandlerStates(StatesGroup):
     clicked_change_email = State()
     providing_new_email = State()
 
+
 class ButtonHandlerRouter(Router):
     def __init__(
-            self, bot: Bot, mongo_client: MongoUsersClient, google_client: GoogleClient, log_chat_id: str
+        self,
+        bot: Bot,
+        mongo_client: MongoUsersClient,
+        google_client: GoogleClient,
+        log_chat_id: str,
     ):
         super().__init__()
         self.bot = bot
@@ -28,43 +36,34 @@ class ButtonHandlerRouter(Router):
         self.log_chat_id = log_chat_id
         self.logger = logging.getLogger(__name__)
         setup_logger(self.logger, self.bot, self.log_chat_id)
-        self.message.register(
-            self.handle_all_links_reply_button,
-            F.text == "All Links"
-        )
+        self.message.register(self.handle_all_links_reply_button, F.text == "All Links")
         self.callback_query.register(
             self.handle_all_links_inline_button,
             ButtonHandlerStates.clicked_all_links,
-            F.data.startswith("table_")
+            F.data.startswith("table_"),
         )
         self.message.register(
-            self.handle_open_the_access_button,
-            F.text == "Open the access"
+            self.handle_open_the_access_button, F.text == "Open the access"
         )
-        self.message.register(
-            self.open_access,
-            ButtonHandlerStates.clicked_open_access
-        )
-        self.message.register(
-            self.change_email,
-            F.text == "Change my email"
-        )
+        self.message.register(self.open_access, ButtonHandlerStates.clicked_open_access)
+        self.message.register(self.change_email, F.text == "Change my email")
         self.callback_query.register(
             self.handle_deny_change_email,
             ButtonHandlerStates.clicked_change_email,
-            F.data.startswith("deny_")
+            F.data.startswith("deny_"),
         )
         self.callback_query.register(
             self.handle_approve_change_email,
             ButtonHandlerStates.clicked_change_email,
-            F.data.startswith("approve_")
+            F.data.startswith("approve_"),
         )
         self.message.register(
-            self.update_with_new_email,
-            ButtonHandlerStates.providing_new_email
+            self.update_with_new_email, ButtonHandlerStates.providing_new_email
         )
 
-    async def handle_all_links_reply_button(self, message: Message, state: FSMContext) -> None:
+    async def handle_all_links_reply_button(
+        self, message: Message, state: FSMContext
+    ) -> None:
         """
         Generates Inline Keyboard Markup depending on user role
 
@@ -76,7 +75,7 @@ class ButtonHandlerRouter(Router):
         user_role = self.mongo_client.get_user_data(user_id).get("role")
         await message.answer(
             f"Please see the list of available links",
-            reply_markup=inline_buttons.generate_all_link_markup(user_role)
+            reply_markup=inline_buttons.generate_all_link_markup(user_role),
         )
         await state.set_state(ButtonHandlerStates.clicked_all_links)
 
@@ -92,7 +91,9 @@ class ButtonHandlerRouter(Router):
         link_to_table = settings.get_table_link(table_name)
         await call.message.answer(f"Link for {table_name}: {link_to_table}")
 
-    async def handle_open_the_access_button(self, message: Message, state: FSMContext) -> None:
+    async def handle_open_the_access_button(
+        self, message: Message, state: FSMContext
+    ) -> None:
         """
         Triggers when user clicked open access function.
         Asks user to provide links to open access.
@@ -122,16 +123,24 @@ class ButtonHandlerRouter(Router):
         list_of_links = re.split(r"[ ,\n]+", links)
         userdata = self.mongo_client.get_user_data(user_id)
         email = userdata.get("email")
-        valid_links = [link for link in list_of_links if self.google_client.is_google_document(link)]
+        valid_links = [
+            link
+            for link in list_of_links
+            if self.google_client.is_google_document(link)
+        ]
         invalid_links = set(list_of_links) - set(valid_links)
         self.google_client.share_access_to_document(valid_links, email)
         valid_links_text = "\n\n".join(valid_links)
         if not invalid_links:
-            await message.answer(f"Access should be opened for the following links: {valid_links_text}")
+            await message.answer(
+                f"Access should be opened for the following links: {valid_links_text}"
+            )
         else:
             invalid_links_message = "\n\n".join(invalid_links)
-            await message.answer(f"Access should be opened for the following links: {valid_links_text}\n\n"
-                                 f"Links that are not google documents: {invalid_links_message}")
+            await message.answer(
+                f"Access should be opened for the following links: {valid_links_text}\n\n"
+                f"Links that are not google documents: {invalid_links_message}"
+            )
         await state.clear()
 
     async def change_email(self, message: Message, state: FSMContext) -> None:
@@ -148,11 +157,13 @@ class ButtonHandlerRouter(Router):
         await message.answer(
             f"Your current email is: {email}\n\n"
             f"Are you sure you want to change it?",
-            reply_markup=inline_buttons.generate_confirmation_markup(user_id)
+            reply_markup=inline_buttons.generate_confirmation_markup(user_id),
         )
         await state.set_state(ButtonHandlerStates.clicked_change_email)
 
-    async def handle_deny_change_email(self, call: CallbackQuery, state: FSMContext) -> None:
+    async def handle_deny_change_email(
+        self, call: CallbackQuery, state: FSMContext
+    ) -> None:
         """
         Denies changing email. Clears state of user
 
@@ -163,7 +174,9 @@ class ButtonHandlerRouter(Router):
         await call.message.edit_text(f"You have denied process of changing email")
         await state.clear()
 
-    async def handle_approve_change_email(self, call: CallbackQuery, state: FSMContext) -> None:
+    async def handle_approve_change_email(
+        self, call: CallbackQuery, state: FSMContext
+    ) -> None:
         """
         Approves changing email. Asks user to provide new email
 
@@ -190,5 +203,7 @@ class ButtonHandlerRouter(Router):
             await message.answer(f"Your email was changed to {new_email}")
             await state.clear()
         else:
-            await message.answer(f"Email: {new_email} does not match the requirements.\n\n"
-                                 f"Try again or choose /cancel command")
+            await message.answer(
+                f"Email: {new_email} does not match the requirements.\n\n"
+                f"Try again or choose /cancel command"
+            )

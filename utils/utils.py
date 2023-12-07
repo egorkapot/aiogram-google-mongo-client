@@ -3,7 +3,8 @@ from logging import Logger
 
 from aiogram import Bot
 
-from google_access_share_bot.bot.bot_logging.admin_logging import BotAdminLoggingHandler
+from google_access_share_bot.bot.bot_logging.admin_logging import \
+    BotAdminLoggingHandler
 
 
 def setup_logger(

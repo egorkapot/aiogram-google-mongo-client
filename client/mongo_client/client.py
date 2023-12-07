@@ -3,6 +3,7 @@ import logging
 
 from aiogram import Bot
 from pymongo import MongoClient, ReturnDocument
+
 from google_access_share_bot.bot.bot import bot
 from google_access_share_bot.settings import settings
 from google_access_share_bot.utils.utils import setup_logger
@@ -62,7 +63,9 @@ class MongoUsersClient:
         :param value: Data to search in the database
         :return: User's data
         """
-        user_data = self.users_collection.find_one({filter_: value}) #TODO maybe wrap into exception
+        user_data = self.users_collection.find_one(
+            {filter_: value}
+        )  # TODO maybe wrap into exception
         return user_data
 
     def get_username(self, value: int | str, filter_: str = "_id") -> str | None:
@@ -141,5 +144,3 @@ MONGO_HOST = settings.mongo_host
 MONGO_PORT = settings.mongo_port
 author_chat_id = settings.author_chat_id
 mongo_client = MongoUsersClient(bot, author_chat_id, MONGO_HOST, MONGO_PORT, "db")
-
-

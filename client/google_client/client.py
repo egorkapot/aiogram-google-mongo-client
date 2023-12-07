@@ -1,18 +1,20 @@
 from __future__ import print_function
-import re
+
 import logging
 import os.path
+import re
 
+from aiogram import Bot
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from google_access_share_bot.utils.utils import setup_logger
-from google_access_share_bot.exceptions.exceptions import _BaseException
-from aiogram import Bot
+
 from google_access_share_bot.bot.bot import bot
+from google_access_share_bot.exceptions.exceptions import _BaseException
 from google_access_share_bot.settings import settings
+from google_access_share_bot.utils.utils import setup_logger
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = [
@@ -21,10 +23,10 @@ SCOPES = [
 ]
 
 
-#TODO create instance inside module
+# TODO create instance inside module
 class GoogleClientException(_BaseException):
     pass
-    #TODO only pass?
+    # TODO only pass?
 
 
 class GoogleClient:
@@ -77,11 +79,11 @@ class GoogleClient:
         user_permission = {"type": "user", "role": "writer", "emailAddress": email}
         for link in links:
             file_id = self.generate_id(link)
-            batch.add(self.drive_client.permissions().create(
-                fileId=file_id,
-                body=user_permission,
-                fields="id")
-                    )
+            batch.add(
+                self.drive_client.permissions().create(
+                    fileId=file_id, body=user_permission, fields="id"
+                )
+            )
         batch.execute()
 
     def get_permission_id(self, link: str, email: str) -> str | None:
@@ -97,10 +99,11 @@ class GoogleClient:
         except GoogleClientException as e:
             self.logger.error(f"Error while generating ID: {e}")
             return None
-        permissions = self.drive_client.permissions().list(
-            fileId=generated_id,
-            fields="permissions(id, emailAddress)"
-        ).execute()
+        permissions = (
+            self.drive_client.permissions()
+            .list(fileId=generated_id, fields="permissions(id, emailAddress)")
+            .execute()
+        )
         for permission in permissions.get("permissions", []):
             if permission.get("emailAddress", "").lower() == email:
                 return permission.get("id")
@@ -125,7 +128,7 @@ class GoogleClient:
         command.execute()
         self.logger.info(f"Removed access from user")
 
-    #TODO update with buttons
+    # TODO update with buttons
     def clean_spreadsheet(self, link):
         """
         Receives spreadsheet object using drive client.
@@ -191,10 +194,14 @@ class GoogleClient:
         """
         if exception is not None:
             # Handle error
-            self.logger.error(f"Google API batch request {request_id} failed: {exception}")
+            self.logger.error(
+                f"Google API batch request {request_id} failed: {exception}"
+            )
         else:
             # Handle successful response
-            self.logger.info(f"Response from Google API batch request {request_id}: {response}")
+            self.logger.info(
+                f"Response from Google API batch request {request_id}: {response}"
+            )
 
     def is_google_document(self, link: str):
         """Validates that the link is a document"""

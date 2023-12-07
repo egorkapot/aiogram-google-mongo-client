@@ -20,9 +20,12 @@ class ReplyButtons:
         :return: Instance of ReplyKeyboardMarkup
         """
         return ReplyKeyboardMarkup(
-            resize_keyboard=True, keyboard=[
-                [cls.open_access], [cls.all_links, cls.change_email], [cls.delete_user, cls.clean_table]
-            ]
+            resize_keyboard=True,
+            keyboard=[
+                [cls.open_access],
+                [cls.all_links, cls.change_email],
+                [cls.delete_user, cls.clean_table],
+            ],
         )
 
     @classmethod
@@ -34,7 +37,8 @@ class ReplyButtons:
         :return: Instance of ReplyKeyboardMarkup
         """
         return ReplyKeyboardMarkup(
-            resize_keyboard=True, keyboard=[[cls.open_access], [cls.all_links, cls.change_email]]
+            resize_keyboard=True,
+            keyboard=[[cls.open_access], [cls.all_links, cls.change_email]],
         )
 
     @classmethod
@@ -83,14 +87,10 @@ class InlineButtons:
     working_tables_markup = [web_content_table_, web_ai_table_, seo_content_table_]
     all_link_markup = [
         [web_content_table_, web_ai_table_, seo_content_table_],
-        [backup_table_, link_to_guide_]
+        [backup_table_, link_to_guide_],
     ]
-    confirm_button = InlineKeyboardButton(
-        text="Confirm ✅", callback_data="confirm"
-    )
-    deny_button = InlineKeyboardButton(
-        text="Deny ❌", callback_data="deny"
-    )
+    confirm_button = InlineKeyboardButton(text="Confirm ✅", callback_data="confirm")
+    deny_button = InlineKeyboardButton(text="Deny ❌", callback_data="deny")
     skip_button = InlineKeyboardButton(text="Skip ⏩", callback_data="skip")
 
     @classmethod

@@ -1,13 +1,13 @@
 import logging
-import re
 
 from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
-from google_access_share_bot.bot.bot_package.buttons import (inline_buttons)
-from google_access_share_bot.client.google_client.client import GoogleClient, GoogleClientException
+from google_access_share_bot.bot.bot_package.buttons import inline_buttons
+from google_access_share_bot.client.google_client.client import (
+    GoogleClient, GoogleClientException)
 from google_access_share_bot.client.mongo_client.client import MongoUsersClient
 from google_access_share_bot.settings import settings
 from google_access_share_bot.utils.utils import setup_logger
@@ -21,14 +21,18 @@ class DeleteStates(StatesGroup):
 
 class DeleteRouter(Router):
     def __init__(
-        self, bot: Bot, mongo_client: MongoUsersClient, google_client: GoogleClient, log_chat_id: str
+        self,
+        bot: Bot,
+        mongo_client: MongoUsersClient,
+        google_client: GoogleClient,
+        log_chat_id: str,
     ):
         """
         Initialisation of the Mongo client, bot instance to handle bot-specific
         functions that are not supported by methods of Message class.
 
-        :param bot: instance of telebot
-        :param mongo_client: instance of Mongo database
+        :param bot: Instance of telebot
+        :param mongo_client: Instance of Mongo database
         """
         super().__init__()
         self.bot = bot
@@ -37,14 +41,8 @@ class DeleteRouter(Router):
         self.log_chat_id = log_chat_id
         self.logger = logging.getLogger(__name__)
         setup_logger(self.logger, self.bot, self.log_chat_id)
-        self.message.register(
-            self.cmd_delete,
-            F.text == "Delete User"
-        )
-        self.message.register(
-            self.validate_user_name,
-            DeleteStates.asked_for_user_name
-        )
+        self.message.register(self.handle_delete_button, F.text == "Delete User")
+        self.message.register(self.validate_user_name, DeleteStates.asked_for_user_name)
         self.callback_query.register(
             self.handle_table_button_click,
             F.data.startswith("table_"),
@@ -61,22 +59,18 @@ class DeleteRouter(Router):
             DeleteStates.choosing_table_links,
         )
         self.callback_query.register(
-            self.deny_selection,
-            F.data == "deny",
-            DeleteStates.confirming_selection
+            self.deny_selection, F.data == "deny", DeleteStates.confirming_selection
         )
         self.callback_query.register(
-            self.delete_user,
-            F.data == "confirm",
-            DeleteStates.confirming_selection
+            self.delete_user, F.data == "confirm", DeleteStates.confirming_selection
         )
 
-    async def cmd_delete(self, message: Message, state: FSMContext):
+    async def handle_delete_button(self, message: Message, state: FSMContext):
         """
         Validates that the user is admin. Asks to provide a username to delete
 
-        :param message:
-        :param state:
+        :param message: Message from user
+        :param state: Current state of user
         :return:
         """
         await state.clear()
@@ -87,18 +81,22 @@ class DeleteRouter(Router):
             await message.answer(f"You are not registered user!")
             return
         if user_role_ == "admin":
-            userdata = self.mongo_client.get_data({}, {"username": 1, "email": 1, "_id": 0})
+            userdata = self.mongo_client.get_data(
+                {}, {"username": 1, "email": 1, "_id": 0}
+            )
             print(userdata)
-            userdata_text = (
-                "\n\n".join(
-                            f"{index}. "
-                            f"Username: {userdata_['username']}, "
-                            f"Email: {userdata_['email']}" for index, userdata_ in enumerate(userdata, start=1)
-                            )
+            userdata_text = "\n\n".join(
+                f"{index}. "
+                f"Username: {userdata_['username']}, "
+                f"Email: {userdata_['email']}"
+                for index, userdata_ in enumerate(userdata, start=1)
             )
             await state.set_state(DeleteStates.asked_for_user_name)
-            await message.answer(f"<b>Current users are</b>: \n\n{userdata_text}\n\n"
-                                 f"\n<b>Please provide telegram's username of user to delete</b>", parse_mode="HTML")
+            await message.answer(
+                f"<b>Current users are</b>: \n\n{userdata_text}\n\n"
+                f"\n<b>Please provide telegram's username of user to delete</b>",
+                parse_mode="HTML",
+            )
         else:
             await message.answer("Prohibited to use admins command")
             self.logger.info(

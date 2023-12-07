@@ -5,9 +5,10 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
-from google_access_share_bot.client.google_client.client import google_client
+
 from google_access_share_bot.bot.bot_package.buttons import (inline_buttons,
                                                              reply_buttons)
+from google_access_share_bot.client.google_client.client import google_client
 from google_access_share_bot.client.mongo_client.client import MongoUsersClient
 from google_access_share_bot.utils.utils import setup_logger
 
@@ -32,7 +33,7 @@ class RegistrationRouter(Router):
         self.mongo_client = mongo_client
         self.log_chat_id = log_chat_id
         self.logger = logging.getLogger(__name__)
-        setup_logger(self.logger, self.bot, self.log_chat_id)
+        setup_logger(self.logger, self.bot, self.log_chat_id, logging.WARNING)
         self.message.register(self.cmd_start, Command("start"))
         self.message.register(
             self.email_is_valid,
