@@ -91,6 +91,7 @@ class ButtonHandlerRouter(Router):
         link_to_table = settings.get_table_link(table_name)
         await call.message.answer(f"Link for {table_name}: {link_to_table}")
 
+
     async def handle_open_the_access_button(
         self, message: Message, state: FSMContext
     ) -> None:
