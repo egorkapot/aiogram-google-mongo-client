@@ -1,0 +1,22 @@
+{
+    "$jsonSchema": {
+        "bsonType": "object",
+        "required": ["_id", "username", "role", "email", "status"],
+        "properties": {
+            "_id": {
+                "bsonType": ["long", "int"]
+            },
+            "username": {
+                "bsonType": ["string"]
+            },
+            "role": {
+                "bsonType": ["string", "null"],
+                "enum": ["admin", "user", "biggiko", null]
+            },
+            "email": {
+                "bsonType": ["string"],
+                "maxItems": 1
+            }
+        }
+    }
+}

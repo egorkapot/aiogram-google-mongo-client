@@ -1,0 +1,15 @@
+access_bot/
+README.md
+CHANGELOG.md
+docker-compose.yml
+Dockerfile
+# git
+.git
+.gitattributes
+.gitignore
+# JetBrains
+.idea
+#project stuff
+.envrc.example.txt
+#bash
+deploy.sh

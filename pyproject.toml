@@ -1,0 +1,23 @@
+[tool.black]
+exclude = '''
+(
+/(
+    \.git
+  | \.venv
+  | \.eggs
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | access_bot
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+| \.direnv
+)
+'''
+
+[tool.isort]
+skip = ".venv, access_bot"

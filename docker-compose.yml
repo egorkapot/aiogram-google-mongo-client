@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  bot:
+    build: .
+    image: telegram_access_bot:latest
+    container_name: telegram_bot
+    depends_on:
+      - mongo
+    environment:
+      MONGO_HOST: mongo
+      MONGO_PORT: ${MONGO_PORT}
+
+  mongo:
+    image: "mongo"
+    container_name: mongo_db
+    volumes:
+      - mongodata:/data/db
+volumes:
+  mongodata:
