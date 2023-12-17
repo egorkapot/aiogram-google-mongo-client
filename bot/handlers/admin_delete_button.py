@@ -1,4 +1,5 @@
 import logging
+from datetime import timedelta
 
 from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
@@ -6,12 +7,10 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from bot.bot_package.buttons import inline_buttons
-from client.google_client.client import (
-    GoogleClient, GoogleClientException)
+from client.google_client.client import GoogleClient, GoogleClientException
 from client.mongo_client.client import MongoUsersClient
 from settings import settings
 from utils.utils import setup_logger
-from datetime import timedelta
 
 
 class DeleteStates(StatesGroup):
@@ -273,9 +272,9 @@ class DeleteRouter(Router):
             chat_id=settings.web_content_chat_id,
             user_id=user_id,
             until_date=timedelta(minutes=1),
-            revoke_messages=True
+            revoke_messages=True,
         )
         await self.bot.send_message(
             chat_id=settings.web_content_chat_id,
-            text=f"User: {user_to_delete} was banned"
+            text=f"User: {user_to_delete} was banned",
         )

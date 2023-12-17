@@ -6,11 +6,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
-from bot.bot_package.buttons import (inline_buttons, reply_buttons)
+from bot.bot_package.buttons import inline_buttons, reply_buttons
 from client.google_client.client import google_client
 from client.mongo_client.client import MongoUsersClient
-from utils.utils import setup_logger
 from settings import settings
+from utils.utils import setup_logger
 
 
 class RegistrationStates(StatesGroup):
@@ -174,6 +174,5 @@ class RegistrationRouter(Router):
             chat_id=settings.web_content_chat_id
         )
         await self.bot.send_message(
-            user_id_,
-            text=f"Your invite link: {chat_invite_link}"
+            user_id_, text=f"Your invite link: {chat_invite_link}"
         )

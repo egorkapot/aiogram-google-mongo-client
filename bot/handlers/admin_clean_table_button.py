@@ -6,8 +6,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from bot.bot_package.buttons import inline_buttons
-from client.google_client.client import (
-    GoogleClient, GoogleClientException)
+from client.google_client.client import GoogleClient, GoogleClientException
 from client.mongo_client.client import MongoUsersClient
 from settings import settings
 from utils.utils import setup_logger
@@ -55,7 +54,7 @@ class CleanTableRouter(Router):
         user_id_ = message.from_user.id
         try:
             user_role_ = self.mongo_client.get_user_data(user_id_).get("role")
-        except AttributeError as e:
+        except AttributeError as e: #TODO wrap into module exception
             await message.answer(f"You are not registered user!")
             return
         if user_role_ == "admin":

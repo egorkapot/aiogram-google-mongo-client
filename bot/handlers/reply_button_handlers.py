@@ -7,8 +7,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from bot.bot_package.buttons import inline_buttons
-from client.google_client.client import (
-    GoogleClient, GoogleClientException)
+from client.google_client.client import GoogleClient, GoogleClientException
 from client.mongo_client.client import MongoUsersClient
 from settings import settings
 from utils.utils import setup_logger
@@ -19,7 +18,7 @@ class ButtonHandlerStates(StatesGroup):
     clicked_open_access = State()
     clicked_change_email = State()
     providing_new_email = State()
-
+    clicked_check_for_plagiarism = State()
 
 class ButtonHandlerRouter(Router):
     def __init__(
@@ -36,7 +35,10 @@ class ButtonHandlerRouter(Router):
         self.log_chat_id = log_chat_id
         self.logger = logging.getLogger(__name__)
         setup_logger(self.logger, self.bot, self.log_chat_id)
-        self.message.register(self.handle_all_links_reply_button, F.text == "All Links")
+        self.message.register(
+            self.handle_all_links_reply_button,
+            F.text == "All Links"
+        )
         self.callback_query.register(
             self.handle_all_links_inline_button,
             ButtonHandlerStates.clicked_all_links,
@@ -59,6 +61,10 @@ class ButtonHandlerRouter(Router):
         )
         self.message.register(
             self.update_with_new_email, ButtonHandlerStates.providing_new_email
+        )
+        self.message.register(
+            self.check_for_plagiarism,
+            F.text == "Check for plagiarism"
         )
 
     async def handle_all_links_reply_button(
@@ -90,7 +96,6 @@ class ButtonHandlerRouter(Router):
         table_name = call.data.split("table_")[1]
         link_to_table = settings.get_table_link(table_name)
         await call.message.answer(f"Link for {table_name}: {link_to_table}")
-
 
     async def handle_open_the_access_button(
         self, message: Message, state: FSMContext
@@ -208,3 +213,7 @@ class ButtonHandlerRouter(Router):
                 f"Email: {new_email} does not match the requirements.\n\n"
                 f"Try again or choose /cancel command"
             )
+
+    async def check_for_plagiarism(self, message: Message, state: FSMContext):
+        await message.answer("Not implemented yet") #TODO
+

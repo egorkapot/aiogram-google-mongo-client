@@ -3,8 +3,7 @@ from logging import Logger
 
 from aiogram import Bot
 
-from bot.bot_logging.admin_logging import \
-    BotAdminLoggingHandler
+from bot.bot_logging.admin_logging import BotAdminLoggingHandler
 
 
 def setup_logger(
