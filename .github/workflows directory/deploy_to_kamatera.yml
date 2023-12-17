@@ -1,0 +1,23 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: connect to Kamatera using SSH and run bash command
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.KAMATERA_SERVER_IP }}
+        username: ${{ secrets.KAMATERA_USERNAME }}
+        password: ${{ secrets.KAMATERA_PASSWORD }}
+        script: |
+          cd bot
+          git clone ${{ secrets.REPOSITORY_URL }}
+          cd aiogram-google-mongo-client
+          bash deploy.sh production

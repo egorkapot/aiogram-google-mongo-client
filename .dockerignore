@@ -7,6 +7,7 @@ Dockerfile
 .git
 .gitattributes
 .gitignore
+.github/
 # JetBrains
 .idea
 #project stuff
