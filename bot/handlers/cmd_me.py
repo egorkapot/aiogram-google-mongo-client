@@ -27,4 +27,3 @@ class MeRouter(Router):
         response += f"Last Name: {last_name}\n"
         response += f"Username: @{username}"
         await message.answer(response)
-

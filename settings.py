@@ -29,6 +29,7 @@ class Settings(BaseSettings):
 
     To retrieve secret values use get_secret_value() function
     """
+
     model_config = SettingsConfigDict(
         extra="allow", env_file=".env", env_file_encoding="utf-8", frozen=True
     )

@@ -4,13 +4,11 @@ from aiogram import Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from bot.bot import bot
-from bot.handlers.admin_delete_button import \
-    DeleteRouter
+from bot.handlers.admin_delete_button import DeleteRouter
 from bot.handlers.cmd_cancel import CancelRouter
 from bot.handlers.cmd_me import MeRouter
 from bot.handlers.cmd_start import RegistrationRouter
-from bot.handlers.reply_button_handlers import \
-    ButtonHandlerRouter
+from bot.handlers.reply_button_handlers import ButtonHandlerRouter
 from client.google_client.client import google_client
 from client.mongo_client.client import mongo_client
 from settings import settings
