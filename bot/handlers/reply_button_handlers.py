@@ -127,7 +127,7 @@ class ButtonHandlerRouter(Router):
         user_id = message.from_user.id
         links = message.text
         list_of_links = re.split(r"[ ,\n]+", links)
-        userdata = self.mongo_client.get_user_data(user_id)
+        userdata = self.mongo_client.get_user_data(user_id) #TODO wrap attributeerror in open access
         email = userdata.get("email")
         valid_links = [
             link
