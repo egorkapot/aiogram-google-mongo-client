@@ -102,7 +102,7 @@ class RegistrationRouter(Router):
             f"The email - {message.text} was sent to approval.\n\n"
             f"We will let you know once you have the access"
         )
-        await state.update_data(username=message.from_user.username.lower())
+        await state.update_data(username=message.from_user.username.lower()) #TODO set wrapper for users who don’t have a username
         await state.update_data(email=message.text.lower())
         user_state = await state.get_data()
         self.mongo_client.add_user(user_id_, user_state)
