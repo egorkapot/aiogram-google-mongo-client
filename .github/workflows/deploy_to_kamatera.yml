@@ -25,5 +25,7 @@ jobs:
           ls -a
           echo "Cloning the repository..."
           git clone ${{ secrets.REPOSITORY_URL }}
+          echo "Entering the repository..."
+          cd aiogram-google-mongo-client
           echo "Running bash script..."
           bash deploy.sh production
