@@ -17,6 +17,13 @@ jobs:
         username: ${{ secrets.KAMATERA_USERNAME }}
         password: ${{ secrets.KAMATERA_PASSWORD }}
         script: |
+          echo "Starting deployment process..."
+          echo "Current directory is $(pwd)"
+          echo "Entering the directory..."
           cd bot/aiogram-google-mongo-client/
+          echo "Listing contents of repository:"
+          ls -a
+          echo "Cloning the repository..."
           git clone ${{ secrets.REPOSITORY_URL }}
+          echo "Running bash script..."
           bash deploy.sh production
