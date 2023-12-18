@@ -17,7 +17,6 @@ jobs:
         username: ${{ secrets.KAMATERA_USERNAME }}
         password: ${{ secrets.KAMATERA_PASSWORD }}
         script: |
-          cd bot
+          cd bot/aiogram-google-mongo-client/
           git clone ${{ secrets.REPOSITORY_URL }}
-          cd aiogram-google-mongo-client
           bash deploy.sh production
