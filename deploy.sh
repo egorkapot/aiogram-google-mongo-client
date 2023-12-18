@@ -23,5 +23,4 @@ if [ "$TIER" = "production" ] || [ "$TIER" = "development" ]; then
     exit 1
 fi
 
-docker build -t telegram_access_bot:latest
-docker-compose up --build
+docker-compose up --build production -d
