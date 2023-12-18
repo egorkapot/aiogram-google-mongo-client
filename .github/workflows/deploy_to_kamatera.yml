@@ -20,7 +20,7 @@ jobs:
           echo "Starting deployment process..."
           echo "Current directory is $(pwd)"
           echo "Entering the directory..."
-          cd bot/aiogram-google-mongo-client/
+          cd bot
           echo "Listing contents of repository:"
           ls -a
           echo "Cloning the repository..."
