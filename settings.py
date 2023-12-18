@@ -44,7 +44,6 @@ class Settings(BaseSettings):
     backup_table_link: str = Field(None, env="BACKUP_TABLE_LINK")
     mongo_host: str = Field("localhost", env="MONGO_HOST")
     mongo_port: int = Field(27017, env="MONGO_PORT")
-    validation_schema_path: str = Field(None, env="VALIDATION_SCHEMA_PATH")
     duplicheker_token: str = Field(None, env="DUPLICHEKER_TOKEN")
     web_content_chat_id: str = Field(None, env="WEB_CONTENT_CHAT_ID")
 
