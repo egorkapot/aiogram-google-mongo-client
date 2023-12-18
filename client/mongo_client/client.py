@@ -42,7 +42,7 @@ class MongoUsersClient:
         """
         Set or update the validation schema for the users' collection.
         """
-        with open(settings.validation_schema_path, "r") as file:
+        with open("client/mongo_client/validation_schema.json", "r") as file:
             validation_schema = json.load(file)
 
         self.db.command({"collMod": "users", "validator": validation_schema})

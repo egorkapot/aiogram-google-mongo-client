@@ -27,5 +27,16 @@ jobs:
           git clone ${{ secrets.REPOSITORY_URL }}
           echo "Entering the repository..."
           cd aiogram-google-mongo-client
+          echo "Exposing environment variables..."
+          export PRODUCTION_BOT_TOKEN=${{ secrets.PRODUCTION_BOT_TOKEN }}
+          export DEVELOPMENT_BOT_TOKEN=${{ secrets.DEVELOPMENT_BOT_TOKEN }}
+          export AUTHOR_CHAT_ID=${{ secrets.AUTHOR_CHAT_ID }}
+          export GUIDE_LINK=${{ secrets.GUIDE_LINK }}
+          export WEB_CONTENT_TABLE_LINK=${{ secrets.WEB_CONTENT_TABLE_LINK }}
+          export WEB_AI_CONTENT_TABLE_LINK=${{ secrets.WEB_AI_CONTENT_TABLE_LINK }}
+          export SEO_CONTENT_TABLE_LINK=${{ secrets.SEO_CONTENT_TABLE_LINK }}
+          export BACKUP_TABLE_LINK=${{ secrets.BACKUP_TABLE_LINK }}
+          export DUPLICHEKER_TOKEN=${{ secrets.DUPLICHEKER_TOKEN }}
+          export WEB_CONTENT_CHAT_ID=${{ secrets.WEB_CONTENT_CHAT_ID }}
           echo "Running bash script..."
           bash deploy.sh production
