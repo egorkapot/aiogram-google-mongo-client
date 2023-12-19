@@ -1,7 +1,5 @@
 name: Deploy to Production
 
-concurrency: production
-
 on:
   push:
     branches:
