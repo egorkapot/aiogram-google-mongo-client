@@ -19,12 +19,17 @@ jobs:
         script: |
           echo "Starting deployment process..."
           echo "Current directory is $(pwd)"
-          echo "Entering the directory..."
-          cd bot
-          echo "Listing contents of repository:"
-          ls -a
-          echo "Cloning the repository..."
-          git clone ${{ secrets.REPOSITORY_URL }}
+          REPO_DIR = "/root/bot/aiogram-google-mongo-client"
+          if [ -d "$REPO_DIR" ]; then
+            echo "Repository exists. Updating existing repository..."
+            cd "REPO_DIR"
+            git fetch
+            git reset --hard origin/production
+            git clean -fd
+          else 
+            echo "Cloning the repository for the first time..."
+            cd bot
+            git clone ${{ secrets.REPOSITORY_URL }}
           echo "Entering the repository..."
           cd aiogram-google-mongo-client
           echo "Exposing environment variables..."
