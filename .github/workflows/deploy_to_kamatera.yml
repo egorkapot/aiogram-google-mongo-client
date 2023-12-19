@@ -19,10 +19,10 @@ jobs:
         script: |
           echo "Starting deployment process..."
           echo "Current directory is $(pwd)"
-          REPO_DIR = "/root/bot/aiogram-google-mongo-client"
+          REPO_DIR="/root/bot/aiogram-google-mongo-client"
           if [ -d "$REPO_DIR" ]; then
             echo "Repository exists. Updating existing repository..."
-            cd "REPO_DIR"
+            cd "$REPO_DIR"
             git fetch
             git reset --hard origin/production
             git clean -fd
