@@ -14,6 +14,17 @@ jobs:
 
     - name: connect to Kamatera using SSH and run bash command
       uses: appleboy/ssh-action@master
+      env:
+        PRODUCTION_BOT_TOKEN: ${{ secrets.PRODUCTION_BOT_TOKEN }
+        DEVELOPMENT_BOT_TOKEN: ${{ secrets.DEVELOPMENT_BOT_TOKEN }}
+        AUTHOR_CHAT_ID: ${{ secrets.AUTHOR_CHAT_ID }}
+        GUIDE_LINK: ${{ secrets.GUIDE_LINK }}
+        WEB_CONTENT_TABLE_LINK: ${{ secrets.WEB_CONTENT_TABLE_LINK }}
+        WEB_AI_CONTENT_TABLE_LINK: ${{ secrets.WEB_AI_CONTENT_TABLE_LINK }}
+        SEO_CONTENT_TABLE_LINK: ${{ secrets.SEO_CONTENT_TABLE_LINK }}
+        BACKUP_TABLE_LINK: ${{ secrets.BACKUP_TABLE_LINK }}
+        DUPLICHEKER_TOKEN: ${{ secrets.DUPLICHEKER_TOKEN }}
+        WEB_CONTENT_CHAT_ID: ${{ secrets.WEB_CONTENT_CHAT_ID }}
       with:
         host: ${{ secrets.KAMATERA_SERVER_IP }}
         username: ${{ secrets.KAMATERA_USERNAME }}
@@ -35,21 +46,34 @@ jobs:
             cd "$REPO_DIR" 
           fi
           echo "Exposing environment variables..."
-          export PRODUCTION_BOT_TOKEN=${{ secrets.PRODUCTION_BOT_TOKEN }}
-          echo "PRODUCTION_BOT_TOKEN length: ${#PRODUCTION_BOT_TOKEN}"
-          export DEVELOPMENT_BOT_TOKEN=${{ secrets.DEVELOPMENT_BOT_TOKEN }}
-          echo "DEVELOPMENT_BOT_TOKEN length: ${#DEVELOPMENT_BOT_TOKEN}"
-          export WEB_CONTENT_TABLE_LINK=${{ secrets.WEB_CONTENT_TABLE_LINK }}
-          echo "WEB_CONTENT_TABLE_LINK length: ${#WEB_CONTENT_TABLE_LINK}"
-          export WEB_AI_CONTENT_TABLE_LINK=${{ secrets.WEB_AI_CONTENT_TABLE_LINK }}
-          echo "WEB_AI_CONTENT_TABLE_LINK length: ${#WEB_AI_CONTENT_TABLE_LINK}"
-          export SEO_CONTENT_TABLE_LINK=${{ secrets.SEO_CONTENT_TABLE_LINK }}
-          echo "SEO_CONTENT_TABLE_LINK length: ${#SEO_CONTENT_TABLE_LINK}"
-          export BACKUP_TABLE_LINK=${{ secrets.BACKUP_TABLE_LINK }}
-          echo "BACKUP_TABLE_LINK length: ${#BACKUP_TABLE_LINK}"
-          export DUPLICHEKER_TOKEN=${{ secrets.DUPLICHEKER_TOKEN }}
-          echo "DUPLICHEKER_TOKEN length: ${#DUPLICHEKER_TOKEN}"
-          export WEB_CONTENT_CHAT_ID=${{ secrets.WEB_CONTENT_CHAT_ID }}
-          echo "WEB_CONTENT_CHAT_ID length: ${#WEB_CONTENT_CHAT_ID}"
+          export PRODUCTION_BOT_TOKEN=$PRODUCTION_BOT_TOKEN
+          export DEVELOPMENT_BOT_TOKEN=$DEVELOPMENT_BOT_TOKEN
+          export AUTHOR_CHAT_ID=$AUTHOR_CHAT_ID
+          export GUIDE_LINK=$GUIDE_LINK
+          export WEB_CONTENT_TABLE_LINK=$WEB_CONTENT_TABLE_LINK
+          export WEB_AI_CONTENT_TABLE_LINK=$WEB_AI_CONTENT_TABLE_LINK
+          export SEO_CONTENT_TABLE_LINK=$SEO_CONTENT_TABLE_LINK
+          export BACKUP_TABLE_LINK=$BACKUP_TABLE_LINK
+          export DUPLICHEKER_TOKEN=$DUPLICHEKER_TOKEN
+          export WEB_CONTENT_CHAT_ID=$WEB_CONTENT_CHAT_ID
+#          echo "PRODUCTION_BOT_TOKEN length: ${#PRODUCTION_BOT_TOKEN}"
+#          export DEVELOPMENT_BOT_TOKEN=${{ secrets.DEVELOPMENT_BOT_TOKEN }}
+#          echo "DEVELOPMENT_BOT_TOKEN length: ${#DEVELOPMENT_BOT_TOKEN}"
+#          export AUTHOR_CHAT_ID=${{ secrets.AUTHOR_CHAT_ID }}
+#          echo "AUTHOR_CHAT_ID length: ${#AUTHOR_CHAT_ID}"
+#          export GUIDE_LINK=${{ secrets.GUIDE_LINK }}
+#          echo "GUIDE_LINK length: ${#GUIDE_LINK}"
+#          export WEB_CONTENT_TABLE_LINK=${{ secrets.WEB_CONTENT_TABLE_LINK }}
+#          echo "WEB_CONTENT_TABLE_LINK length: ${#WEB_CONTENT_TABLE_LINK}"
+#          export WEB_AI_CONTENT_TABLE_LINK=${{ secrets.WEB_AI_CONTENT_TABLE_LINK }}
+#          echo "WEB_AI_CONTENT_TABLE_LINK length: ${#WEB_AI_CONTENT_TABLE_LINK}"
+#          export SEO_CONTENT_TABLE_LINK=${{ secrets.SEO_CONTENT_TABLE_LINK }}
+#          echo "SEO_CONTENT_TABLE_LINK length: ${#SEO_CONTENT_TABLE_LINK}"
+#          export BACKUP_TABLE_LINK=${{ secrets.BACKUP_TABLE_LINK }}
+#          echo "BACKUP_TABLE_LINK length: ${#BACKUP_TABLE_LINK}"
+#          export DUPLICHEKER_TOKEN=${{ secrets.DUPLICHEKER_TOKEN }}
+#          echo "DUPLICHEKER_TOKEN length: ${#DUPLICHEKER_TOKEN}"
+#          export WEB_CONTENT_CHAT_ID=${{ secrets.WEB_CONTENT_CHAT_ID }}
+#          echo "WEB_CONTENT_CHAT_ID length: ${#WEB_CONTENT_CHAT_ID}"
           echo "Running bash script..."
           bash deploy.sh production
