@@ -29,4 +29,4 @@ if [ "$TIER" = "production" ] || [ "$TIER" = "development" ]; then
     exit 1
 fi
 
-docker-compose up --build production -d
+docker-compose up --build -d
