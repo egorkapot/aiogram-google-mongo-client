@@ -13,7 +13,7 @@ jobs:
     - name: connect to Kamatera using SSH and run bash command
       uses: appleboy/ssh-action@master
       env:
-        PRODUCTION_BOT_TOKEN: ${{ secrets.PRODUCTION_BOT_TOKEN }
+        PRODUCTION_BOT_TOKEN: ${{ secrets.PRODUCTION_BOT_TOKEN }}
         DEVELOPMENT_BOT_TOKEN: ${{ secrets.DEVELOPMENT_BOT_TOKEN }}
         AUTHOR_CHAT_ID: ${{ secrets.AUTHOR_CHAT_ID }}
         GUIDE_LINK: ${{ secrets.GUIDE_LINK }}
@@ -27,6 +27,17 @@ jobs:
         host: ${{ secrets.KAMATERA_SERVER_IP }}
         username: ${{ secrets.KAMATERA_USERNAME }}
         password: ${{ secrets.KAMATERA_PASSWORD }}
+        envs: |
+          PRODUCTION_BOT_TOKEN,
+          DEVELOPMENT_BOT_TOKEN,
+          AUTHOR_CHAT_ID,
+          GUIDE_LINK,
+          WEB_CONTENT_TABLE_LINK,
+          WEB_AI_CONTENT_TABLE_LINK,
+          SEO_CONTENT_TABLE_LINK,
+          BACKUP_TABLE_LINK,
+          DUPLICHEKER_TOKEN,
+          WEB_CONTENT_CHAT_ID
         script: |
           echo "Starting deployment process..."
           echo "Current directory is $(pwd)"
@@ -43,17 +54,6 @@ jobs:
             git clone -b production ${{ secrets.REPOSITORY_URL }}
             cd "$REPO_DIR" 
           fi
-          echo "Exposing environment variables..."
-          export PRODUCTION_BOT_TOKEN=$PRODUCTION_BOT_TOKEN
-          export DEVELOPMENT_BOT_TOKEN=$DEVELOPMENT_BOT_TOKEN
-          export AUTHOR_CHAT_ID=$AUTHOR_CHAT_ID
-          export GUIDE_LINK=$GUIDE_LINK
-          export WEB_CONTENT_TABLE_LINK=$WEB_CONTENT_TABLE_LINK
-          export WEB_AI_CONTENT_TABLE_LINK=$WEB_AI_CONTENT_TABLE_LINK
-          export SEO_CONTENT_TABLE_LINK=$SEO_CONTENT_TABLE_LINK
-          export BACKUP_TABLE_LINK=$BACKUP_TABLE_LINK
-          export DUPLICHEKER_TOKEN=$DUPLICHEKER_TOKEN
-          export WEB_CONTENT_CHAT_ID=$WEB_CONTENT_CHAT_ID
 #          echo "PRODUCTION_BOT_TOKEN length: ${#PRODUCTION_BOT_TOKEN}"
 #          export DEVELOPMENT_BOT_TOKEN=${{ secrets.DEVELOPMENT_BOT_TOKEN }}
 #          echo "DEVELOPMENT_BOT_TOKEN length: ${#DEVELOPMENT_BOT_TOKEN}"
