@@ -28,10 +28,10 @@ jobs:
             git clean -fd
           else 
             echo "Cloning the repository for the first time..."
-            cd bot
-            git clone ${{ secrets.REPOSITORY_URL }}
-          echo "Entering the repository..."
-          cd aiogram-google-mongo-client
+            cd /root/bot
+            git clone -b production ${{ secrets.REPOSITORY_URL }}
+            cd "$REPO_DIR" 
+          fi
           echo "Exposing environment variables..."
           export PRODUCTION_BOT_TOKEN=${{ secrets.PRODUCTION_BOT_TOKEN }}
           export DEVELOPMENT_BOT_TOKEN=${{ secrets.DEVELOPMENT_BOT_TOKEN }}
