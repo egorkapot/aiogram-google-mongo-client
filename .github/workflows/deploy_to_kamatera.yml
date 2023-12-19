@@ -39,10 +39,6 @@ jobs:
           echo "PRODUCTION_BOT_TOKEN length: ${#PRODUCTION_BOT_TOKEN}"
           export DEVELOPMENT_BOT_TOKEN=${{ secrets.DEVELOPMENT_BOT_TOKEN }}
           echo "DEVELOPMENT_BOT_TOKEN length: ${#DEVELOPMENT_BOT_TOKEN}"
-          export AUTHOR_CHAT_ID=${{ secrets.AUTHOR_CHAT_ID }}
-          echo "AUTHOR_CHAT_ID length: ${#AUTHOR_CHAT_ID}"
-          export GUIDE_LINK=${{ secrets.GUIDE_LINK }}
-          echo "GUIDE_LINK length: ${#GUIDE_LINK}"
           export WEB_CONTENT_TABLE_LINK=${{ secrets.WEB_CONTENT_TABLE_LINK }}
           echo "WEB_CONTENT_TABLE_LINK length: ${#WEB_CONTENT_TABLE_LINK}"
           export WEB_AI_CONTENT_TABLE_LINK=${{ secrets.WEB_AI_CONTENT_TABLE_LINK }}
