@@ -9,29 +9,37 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-
-    - name: connect to Kamatera using SSH and run bash command
+    - name: Connect to Kamatera using SSH and run bash command
       uses: appleboy/ssh-action@master
+      env:
+        PRODUCTION_BOT_TOKEN: ${{ secrets.PRODUCTION_BOT_TOKEN }}
+        DEVELOPMENT_BOT_TOKEN: ${{ secrets.DEVELOPMENT_BOT_TOKEN }}
+        AUTHOR_CHAT_ID: ${{ secrets.AUTHOR_CHAT_ID }}
+        GUIDE_LINK: ${{ secrets.GUIDE_LINK }}
+        WEB_CONTENT_TABLE_LINK: ${{ secrets.WEB_CONTENT_TABLE_LINK }}
+        WEB_AI_CONTENT_TABLE_LINK: ${{ secrets.WEB_AI_CONTENT_TABLE_LINK }}
+        SEO_CONTENT_TABLE_LINK: ${{ secrets.SEO_CONTENT_TABLE_LINK }}
+        BACKUP_TABLE_LINK: ${{ secrets.BACKUP_TABLE_LINK }}
+        DUPLICHEKER_TOKEN: ${{ secrets.DUPLICHEKER_TOKEN }}
+        WEB_CONTENT_CHAT_ID: ${{ secrets.WEB_CONTENT_CHAT_ID }}
       with:
         host: ${{ secrets.KAMATERA_SERVER_IP }}
         username: ${{ secrets.KAMATERA_USERNAME }}
         password: ${{ secrets.KAMATERA_PASSWORD }}
         envs: |
-          PRODUCTION_BOT_TOKEN=${{ secrets.PRODUCTION_BOT_TOKEN }},
-          DEVELOPMENT_BOT_TOKEN=${{ secrets.DEVELOPMENT_BOT_TOKEN }},
-          AUTHOR_CHAT_ID=${{ secrets.AUTHOR_CHAT_ID }},
-          GUIDE_LINK=${{ secrets.GUIDE_LINK }},
-          WEB_CONTENT_TABLE_LINK=${{ secrets.WEB_CONTENT_TABLE_LINK }},
-          WEB_AI_CONTENT_TABLE_LINK=${{ secrets.WEB_AI_CONTENT_TABLE_LINK }},
-          SEO_CONTENT_TABLE_LINK=${{ secrets.SEO_CONTENT_TABLE_LINK }},
-          BACKUP_TABLE_LINK=${{ secrets.BACKUP_TABLE_LINK }},
-          DUPLICHEKER_TOKEN=${{ secrets.DUPLICHEKER_TOKEN }},
-          WEB_CONTENT_CHAT_ID=${{ secrets.WEB_CONTENT_CHAT_ID }}
+          PRODUCTION_BOT_TOKEN,
+          DEVELOPMENT_BOT_TOKEN,
+          AUTHOR_CHAT_ID,
+          GUIDE_LINK,
+          WEB_CONTENT_TABLE_LINK,
+          WEB_AI_CONTENT_TABLE_LINK,
+          SEO_CONTENT_TABLE_LINK,
+          BACKUP_TABLE_LINK,
+          DUPLICHEKER_TOKEN,
+          WEB_CONTENT_CHAT_ID
         script: |
-          echo "Checking if environment variables are set..."
-          if [ -z "$PRODUCTION_BOT_TOKEN" ]; then echo "PRODUCTION_BOT_TOKEN is not set"; else echo "PRODUCTION_BOT_TOKEN is set"; fi
-          if [ -z "$DEVELOPMENT_BOT_TOKEN" ]; then echo "DEVELOPMENT_BOT_TOKEN is not set"; else echo "DEVELOPMENT_BOT_TOKEN is set"; fi
           echo "Starting deployment process..."
+          echo "Current directory is $(pwd)"
           REPO_DIR="/root/bot/aiogram-google-mongo-client"
           if [ -d "$REPO_DIR" ]; then
             echo "Repository exists. Updating existing repository..."
@@ -45,5 +53,16 @@ jobs:
             git clone -b production ${{ secrets.REPOSITORY_URL }}
             cd "$REPO_DIR" 
           fi
+          echo "Exposing environment variables..."
+          echo "PRODUCTION_BOT_TOKEN is set to: $PRODUCTION_BOT_TOKEN"
+          echo "DEVELOPMENT_BOT_TOKEN is set to: $DEVELOPMENT_BOT_TOKEN"
+          echo "AUTHOR_CHAT_ID is set to: $AUTHOR_CHAT_ID"
+          echo "GUIDE_LINK is set to: $GUIDE_LINK"
+          echo "WEB_CONTENT_TABLE_LINK is set to: $WEB_CONTENT_TABLE_LINK"
+          echo "WEB_AI_CONTENT_TABLE_LINK is set to: $WEB_AI_CONTENT_TABLE_LINK"
+          echo "SEO_CONTENT_TABLE_LINK is set to: $SEO_CONTENT_TABLE_LINK"
+          echo "BACKUP_TABLE_LINK is set to: $BACKUP_TABLE_LINK"
+          echo "DUPLICHEKER_TOKEN is set to: $DUPLICHEKER_TOKEN"
+          echo "WEB_CONTENT_CHAT_ID is set to: $WEB_CONTENT_CHAT_ID"
           echo "Running bash script..."
           bash deploy.sh production
