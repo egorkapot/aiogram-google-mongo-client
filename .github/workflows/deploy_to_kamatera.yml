@@ -41,7 +41,7 @@ jobs:
           WEB_CONTENT_CHAT_ID
           CHECK
         script: |
-          echo "check: $CHECK" 
+          echo "cheeeck: $CHECK" 
           echo "Starting deployment process..."
           echo "Current directory is $(pwd)"
           REPO_DIR="/root/bot/aiogram-google-mongo-client"
