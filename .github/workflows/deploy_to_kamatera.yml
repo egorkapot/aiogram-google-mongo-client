@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Connect to Kamatera using SSH and run bash command
+      uses: appleboy/ssh-action@master
       env:
         PRODUCTION_BOT_TOKEN: ${{ secrets.PRODUCTION_BOT_TOKEN }}
         DEVELOPMENT_BOT_TOKEN: ${{ secrets.DEVELOPMENT_BOT_TOKEN }}
@@ -21,7 +22,7 @@ jobs:
         BACKUP_TABLE_LINK: ${{ secrets.BACKUP_TABLE_LINK }}
         DUPLICHEKER_TOKEN: ${{ secrets.DUPLICHEKER_TOKEN }}
         WEB_CONTENT_CHAT_ID: ${{ secrets.WEB_CONTENT_CHAT_ID }}
-      uses: appleboy/ssh-action@master
+        SUCHKA: ${{ secrets.SUCHKA }
       with:
         host: ${{ secrets.KAMATERA_SERVER_IP }}
         username: ${{ secrets.KAMATERA_USERNAME }}
@@ -36,7 +37,8 @@ jobs:
           SEO_CONTENT_TABLE_LINK,
           BACKUP_TABLE_LINK,
           DUPLICHEKER_TOKEN,
-          WEB_CONTENT_CHAT_ID
+          WEB_CONTENT_CHAT_ID,
+          SUCHKA
         script: |
           echo "Starting deployment process..."
           echo "Current directory is $(pwd)"
@@ -64,5 +66,6 @@ jobs:
           echo "BACKUP_TABLE_LINK is set to: $BACKUP_TABLE_LINK"
           echo "DUPLICHEKER_TOKEN is set to: $DUPLICHEKER_TOKEN"
           echo "WEB_CONTENT_CHAT_ID is set to: $WEB_CONTENT_CHAT_ID"
+          echo "SUCHKA is set to: SUCHKA"
           echo "Running bash script..."
           bash deploy.sh production
