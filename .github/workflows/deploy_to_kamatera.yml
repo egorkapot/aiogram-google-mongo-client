@@ -22,7 +22,7 @@ jobs:
         BACKUP_TABLE_LINK: ${{ secrets.BACKUP_TABLE_LINK }}
         DUPLICHEKER_TOKEN: ${{ secrets.DUPLICHEKER_TOKEN }}
         WEB_CONTENT_CHAT_ID: ${{ secrets.WEB_CONTENT_CHAT_ID }}
-        SUCHKA: ${{ secrets.SUCHKA }
+        SUCHKA: ${{ secrets.SUCHKA }}
       with:
         host: ${{ secrets.KAMATERA_SERVER_IP }}
         username: ${{ secrets.KAMATERA_USERNAME }}
