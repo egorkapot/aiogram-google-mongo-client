@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Connect to Kamatera using SSH and run bash command
-      uses: appleboy/ssh-action@master
       env:
         PRODUCTION_BOT_TOKEN: ${{ secrets.PRODUCTION_BOT_TOKEN }}
         DEVELOPMENT_BOT_TOKEN: ${{ secrets.DEVELOPMENT_BOT_TOKEN }}
@@ -22,6 +21,7 @@ jobs:
         BACKUP_TABLE_LINK: ${{ secrets.BACKUP_TABLE_LINK }}
         DUPLICHEKER_TOKEN: ${{ secrets.DUPLICHEKER_TOKEN }}
         WEB_CONTENT_CHAT_ID: ${{ secrets.WEB_CONTENT_CHAT_ID }}
+      uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.KAMATERA_SERVER_IP }}
         username: ${{ secrets.KAMATERA_USERNAME }}
