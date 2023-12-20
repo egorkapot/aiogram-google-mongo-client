@@ -28,8 +28,10 @@ jobs:
           DUPLICHEKER_TOKEN=${{ secrets.DUPLICHEKER_TOKEN }},
           WEB_CONTENT_CHAT_ID=${{ secrets.WEB_CONTENT_CHAT_ID }}
         script: |
+          echo "Checking if environment variables are set..."
+          if [ -z "$PRODUCTION_BOT_TOKEN" ]; then echo "PRODUCTION_BOT_TOKEN is not set"; else echo "PRODUCTION_BOT_TOKEN is set"; fi
+          if [ -z "$DEVELOPMENT_BOT_TOKEN" ]; then echo "DEVELOPMENT_BOT_TOKEN is not set"; else echo "DEVELOPMENT_BOT_TOKEN is set"; fi
           echo "Starting deployment process..."
-          echo "Current directory is $(pwd)"
           REPO_DIR="/root/bot/aiogram-google-mongo-client"
           if [ -d "$REPO_DIR" ]; then
             echo "Repository exists. Updating existing repository..."
