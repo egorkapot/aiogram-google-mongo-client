@@ -12,36 +12,22 @@ jobs:
 
     - name: connect to Kamatera using SSH and run bash command
       uses: appleboy/ssh-action@master
-      env:
-        PRODUCTION_BOT_TOKEN: ${{ secrets.PRODUCTION_BOT_TOKEN }}
-        DEVELOPMENT_BOT_TOKEN: ${{ secrets.DEVELOPMENT_BOT_TOKEN }}
-        AUTHOR_CHAT_ID: ${{ secrets.AUTHOR_CHAT_ID }}
-        GUIDE_LINK: ${{ secrets.GUIDE_LINK }}
-        WEB_CONTENT_TABLE_LINK: ${{ secrets.WEB_CONTENT_TABLE_LINK }}
-        WEB_AI_CONTENT_TABLE_LINK: ${{ secrets.WEB_AI_CONTENT_TABLE_LINK }}
-        SEO_CONTENT_TABLE_LINK: ${{ secrets.SEO_CONTENT_TABLE_LINK }}
-        BACKUP_TABLE_LINK: ${{ secrets.BACKUP_TABLE_LINK }}
-        DUPLICHEKER_TOKEN: ${{ secrets.DUPLICHEKER_TOKEN }}
-        WEB_CONTENT_CHAT_ID: ${{ secrets.WEB_CONTENT_CHAT_ID }}
-        CHECK: ${{ secrets.CHECK }}
       with:
         host: ${{ secrets.KAMATERA_SERVER_IP }}
         username: ${{ secrets.KAMATERA_USERNAME }}
         password: ${{ secrets.KAMATERA_PASSWORD }}
         envs: |
-          PRODUCTION_BOT_TOKEN
-          DEVELOPMENT_BOT_TOKEN
-          AUTHOR_CHAT_ID
-          GUIDE_LINK
-          WEB_CONTENT_TABLE_LINK
-          WEB_AI_CONTENT_TABLE_LINK
-          SEO_CONTENT_TABLE_LINK
-          BACKUP_TABLE_LINK
-          DUPLICHEKER_TOKEN
-          WEB_CONTENT_CHAT_ID
-          CHECK
+          PRODUCTION_BOT_TOKEN=${{ secrets.PRODUCTION_BOT_TOKEN }},
+          DEVELOPMENT_BOT_TOKEN=${{ secrets.DEVELOPMENT_BOT_TOKEN }},
+          AUTHOR_CHAT_ID=${{ secrets.AUTHOR_CHAT_ID }},
+          GUIDE_LINK=${{ secrets.GUIDE_LINK }},
+          WEB_CONTENT_TABLE_LINK=${{ secrets.WEB_CONTENT_TABLE_LINK }},
+          WEB_AI_CONTENT_TABLE_LINK=${{ secrets.WEB_AI_CONTENT_TABLE_LINK }},
+          SEO_CONTENT_TABLE_LINK=${{ secrets.SEO_CONTENT_TABLE_LINK }},
+          BACKUP_TABLE_LINK=${{ secrets.BACKUP_TABLE_LINK }},
+          DUPLICHEKER_TOKEN=${{ secrets.DUPLICHEKER_TOKEN }},
+          WEB_CONTENT_CHAT_ID=${{ secrets.WEB_CONTENT_CHAT_ID }}
         script: |
-          echo "cheeeck: $CHECK" 
           echo "Starting deployment process..."
           echo "Current directory is $(pwd)"
           REPO_DIR="/root/bot/aiogram-google-mongo-client"
