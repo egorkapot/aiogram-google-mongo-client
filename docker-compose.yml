@@ -3,6 +3,7 @@ version: '3'
 services:
   bot:
     build: .
+    env_file: /root/bot/aiogram-google-mongo-client/.env
     image: telegram_access_bot:latest
     container_name: telegram_bot
     depends_on:
