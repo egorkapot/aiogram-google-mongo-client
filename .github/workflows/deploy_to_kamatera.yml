@@ -22,7 +22,6 @@ jobs:
         BACKUP_TABLE_LINK: ${{ secrets.BACKUP_TABLE_LINK }}
         DUPLICHEKER_TOKEN: ${{ secrets.DUPLICHEKER_TOKEN }}
         WEB_CONTENT_CHAT_ID: ${{ secrets.WEB_CONTENT_CHAT_ID }}
-        SUCHKA: ${{ secrets.SUCHKA }}
       with:
         host: ${{ secrets.KAMATERA_SERVER_IP }}
         username: ${{ secrets.KAMATERA_USERNAME }}
@@ -37,8 +36,7 @@ jobs:
           SEO_CONTENT_TABLE_LINK,
           BACKUP_TABLE_LINK,
           DUPLICHEKER_TOKEN,
-          WEB_CONTENT_CHAT_ID,
-          SUCHKA
+          WEB_CONTENT_CHAT_ID
         script: |
           echo "Starting deployment process..."
           echo "Current directory is $(pwd)"
@@ -56,6 +54,17 @@ jobs:
             cd "$REPO_DIR" 
           fi
           echo "Exposing environment variables..."
+          export PRODUCTION_BOT_TOKEN=$PRODUCTION_BOT_TOKEN
+          export DEVELOPMENT_BOT_TOKEN=$DEVELOPMENT_BOT_TOKEN
+          export AUTHOR_CHAT_ID=$AUTHOR_CHAT_ID
+          export GUIDE_LINK=$GUIDE_LINK
+          export WEB_CONTENT_TABLE_LINK=$WEB_CONTENT_TABLE_LINK
+          export WEB_AI_CONTENT_TABLE_LINK=$WEB_AI_CONTENT_TABLE_LINK
+          export SEO_CONTENT_TABLE_LINK=$SEO_CONTENT_TABLE_LINK
+          export BACKUP_TABLE_LINK=$BACKUP_TABLE_LINK
+          export DUPLICHEKER_TOKEN=$DUPLICHEKER_TOKEN
+          export WEB_CONTENT_CHAT_ID=$WEB_CONTENT_CHAT_ID
+          echo "Printing environment variables..."
           echo "PRODUCTION_BOT_TOKEN is set to: $PRODUCTION_BOT_TOKEN"
           echo "DEVELOPMENT_BOT_TOKEN is set to: $DEVELOPMENT_BOT_TOKEN"
           echo "AUTHOR_CHAT_ID is set to: $AUTHOR_CHAT_ID"
@@ -66,6 +75,5 @@ jobs:
           echo "BACKUP_TABLE_LINK is set to: $BACKUP_TABLE_LINK"
           echo "DUPLICHEKER_TOKEN is set to: $DUPLICHEKER_TOKEN"
           echo "WEB_CONTENT_CHAT_ID is set to: $WEB_CONTENT_CHAT_ID"
-          echo "SUCHKA is set to: SUCHKA"
           echo "Running bash script..."
           bash deploy.sh production
