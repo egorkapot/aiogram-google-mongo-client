@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         extra="allow", env_file=".env", env_file_encoding="utf-8", frozen=True
     )
-    tier: str = Field("production", env="TIER")
+    tier: str = Field("development", env="TIER")
     production_bot_token: SecretStr = Field(..., env="PRODUCTION_BOT_TOKEN")
     development_bot_token: SecretStr = Field(..., env="DEVELOPMENT_BOT_TOKEN")
     author_chat_id: str = Field(..., env="AUTHOR_CHAT_ID")

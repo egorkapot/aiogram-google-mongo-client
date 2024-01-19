@@ -149,13 +149,6 @@ class MongoUsersClient:
         )
         self.logger.warning(f"Information about {username} was changed to {update}")
 
-    def is_registered_user(self, user_id: int):
-        userdata = self.get_user_data(user_id)
-        if userdata is None:
-            raise GoogleClientException("User not found")
-        else:
-            return userdata
-
 
 MONGO_HOST = settings.mongo_host
 MONGO_PORT = settings.mongo_port
