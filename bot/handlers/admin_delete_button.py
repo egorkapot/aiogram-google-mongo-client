@@ -5,6 +5,8 @@ from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
+from aiogram.exceptions import TelegramAPIError
+from exceptions.exceptions import _BaseException
 
 from bot.bot_package.buttons import inline_buttons
 from client.google_client.client import GoogleClient, GoogleClientException
@@ -13,10 +15,15 @@ from settings import settings
 from utils.utils import setup_logger
 
 
+class AdminDeleteException(_BaseException):
+    pass
+
+
 class DeleteStates(StatesGroup):
     asked_for_user_name = State()
     choosing_table_links = State()
     confirming_selection = State()
+    deleting_from_chat = State()
 
 
 class DeleteRouter(Router):
@@ -238,17 +245,19 @@ class DeleteRouter(Router):
         :return: None
         """
         userdata = await state.get_data()
-        table_links = userdata.get("table_links")
         user_id = userdata.get("user_id")
+        table_links = userdata.get("table_links")
         email = userdata.get("email")
         user_to_delete = userdata.get("user_to_delete")
         selected_tables = []
         if table_links:
             for table, link in table_links.items():
                 try:
+                    #Receive permission ID for each document
                     permission_id = self.google_client.get_permission_id(link, email)
-                except GoogleClientException as e:
-                    self.logger.error(e)
+                except GoogleClientException as error:
+                    error_details = error.get_response()
+                    await call.message.answer(f"Error while generating permission ID: {error_details}")
                     return
                 if permission_id:
                     selected_tables.append(table)
@@ -268,13 +277,35 @@ class DeleteRouter(Router):
             await call.message.edit_text(
                 f"User: @{user_to_delete} was deleted from database but was not matched with tables to delete from"
             )
-        await self.bot.ban_chat_member(
-            chat_id=settings.web_content_chat_id,
-            user_id=user_id,
-            until_date=timedelta(minutes=1),
-            revoke_messages=True,
-        )
-        await self.bot.send_message(
-            chat_id=settings.web_content_chat_id,
-            text=f"User: {user_to_delete} was banned",
-        )
+        try:
+            await self.delete_from_group_chat(user_id, settings.web_content_chat_id, user_to_delete)
+        except AdminDeleteException as error:
+            await call.message.answer(f"Can not delete user from group chat: {error}")
+        await state.clear()
+
+    async def delete_from_group_chat(self, user_id: int | str, chat_id: int | str, username: str) -> None:
+        """
+        Bans a user from a specified chat group and handles any Telegram API errors that might occur during the process.
+
+        This method uses the bot's capabilities to ban a user, identified by 'user_id', from a chat group, specified by 'chat_id'.
+        If the banning is successful, a confirmation message is sent to a pre-configured chat. In case of a Telegram API error,
+        the error is logged, and an AdminDeleteException is raised, encapsulating the original exception for further handling.
+
+        :param user_id: The unique identifier of the user to ban.
+        :param chat_id: The unique identifier of the chat from which the user is to be banned.
+        :param username: The username of the user being banned, used for logging and notification purposes.
+        :return: None
+        :raises AdminDeleteException: If a TelegramAPIError occurs during the ban process.
+        """
+        try:
+            await self.bot.ban_chat_member(
+                chat_id=chat_id,
+                user_id=user_id,
+                until_date=timedelta(minutes=1),
+                revoke_messages=True,
+                )
+            await self.bot.send_message(
+                chat_id=settings.web_content_chat_id,
+                text=f"User: {username} was banned")
+        except TelegramAPIError as error:
+            raise AdminDeleteException(str(error)) from error

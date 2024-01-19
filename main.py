@@ -17,11 +17,11 @@ author_chat_id = settings.author_chat_id  # Chat id of creator for logging
 dp = Dispatcher(storage=MemoryStorage())
 cancel_router = CancelRouter()
 me_router = MeRouter()
+start_router = RegistrationRouter(bot, mongo_client, author_chat_id)
 delete_router = DeleteRouter(bot, mongo_client, google_client, author_chat_id)
 button_handler_router = ButtonHandlerRouter(
     bot, mongo_client, google_client, author_chat_id
 )
-start_router = RegistrationRouter(bot, mongo_client, author_chat_id)
 
 
 async def main() -> None:
@@ -33,8 +33,9 @@ async def main() -> None:
     :return: None
     """
     dp.include_routers(
-        cancel_router, me_router, delete_router, button_handler_router, start_router
+        cancel_router, me_router, start_router, delete_router, button_handler_router
     )
+
     await dp.start_polling(bot)
 
 

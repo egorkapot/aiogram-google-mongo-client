@@ -1,5 +1,5 @@
 import logging
-
+import asyncio
 from aiogram import Bot, F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -11,6 +11,7 @@ from client.google_client.client import google_client
 from client.mongo_client.client import MongoUsersClient
 from settings import settings
 from utils.utils import setup_logger
+from aiogram.exceptions import TelegramBadRequest
 
 
 class RegistrationStates(StatesGroup):
@@ -97,12 +98,18 @@ class RegistrationRouter(Router):
         :param state: Current state of user
         :return: None
         """
+        try:
+            await state.update_data(
+                username=message.from_user.username.lower())
+        except AttributeError:
+            await message.answer(f"Your username was not found.\n\n"
+                                 f"Please check your username in the settings and try again.")
+            return
         user_id_ = int(message.from_user.id)
         await message.answer(
             f"The email - {message.text} was sent to approval.\n\n"
             f"We will let you know once you have the access"
         )
-        await state.update_data(username=message.from_user.username.lower()) #TODO set wrapper for users who don’t have a username
         await state.update_data(email=message.text.lower())
         user_state = await state.get_data()
         self.mongo_client.add_user(user_id_, user_state)
@@ -143,8 +150,9 @@ class RegistrationRouter(Router):
         """
         user_id_ = int(call.data.split("_")[1])
         username = self.mongo_client.get_username(user_id_)
-        await call.message.answer(
-            f"You have denied the registration for user: {username}"
+        await call.message.edit_text(
+            f"You have denied the registration for user: {username}",
+            reply_markup=None
         )
         await self.bot.send_message(
             user_id_, "Registration process was denied by admin @egorkapot"
@@ -162,17 +170,21 @@ class RegistrationRouter(Router):
         user_id_ = int(call.data.split("_")[2])
         role_ = call.data.split("_")[1]
         self.mongo_client.update_user(user_id_, {"role": role_, "status": "registered"})
-        self.logger.info(
-            f"{self.mongo_client.get_username(user_id_)} was registered with the role - {role_}"
+        await call.message.edit_text(
+            f"{self.mongo_client.get_username(user_id_)} was registered with the role - {role_}",
+            reply_markup=None
         )
         await self.bot.send_message(
             user_id_,
             "You have been registered! Please see the available options",
             reply_markup=reply_buttons.create_initial_markup(role_),
         )
-        chat_invite_link = await self.bot.export_chat_invite_link(
-            chat_id=settings.web_content_chat_id
-        )
-        await self.bot.send_message(
-            user_id_, text=f"Your invite link: {chat_invite_link}"
-        )
+        try:
+            chat_invite_link = await self.bot.export_chat_invite_link(
+                chat_id=settings.web_content_chat_id
+            )
+            await self.bot.send_message(
+                user_id_, text=f"Your invite link: {chat_invite_link}"
+            )
+        except TelegramBadRequest as error:
+            self.logger.error(f"Error while sending invite link {error}")

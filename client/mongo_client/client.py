@@ -7,6 +7,11 @@ from pymongo import MongoClient, ReturnDocument
 from bot.bot import bot
 from settings import settings
 from utils.utils import setup_logger
+from exceptions.exceptions import _BaseException
+
+
+class GoogleClientException(_BaseException):
+    CODE = "MONGO_CLIENT_ERROR"
 
 
 class MongoUsersClient:
@@ -44,7 +49,6 @@ class MongoUsersClient:
         """
         with open("client/mongo_client/validation_schema.json", "r") as file:
             validation_schema = json.load(file)
-
         self.db.command({"collMod": "users", "validator": validation_schema})
 
     def get_data(self, query: dict, *args) -> list:
@@ -71,7 +75,7 @@ class MongoUsersClient:
         """
         user_data = self.users_collection.find_one(
             {filter_: value}
-        )  # TODO maybe wrap into exception
+        )
         return user_data
 
     def get_username(self, value: int | str, filter_: str = "_id") -> str | None:
@@ -144,6 +148,13 @@ class MongoUsersClient:
             return_document=ReturnDocument.BEFORE,
         )
         self.logger.warning(f"Information about {username} was changed to {update}")
+
+    def is_registered_user(self, user_id: int):
+        userdata = self.get_user_data(user_id)
+        if userdata is None:
+            raise GoogleClientException("User not found")
+        else:
+            return userdata
 
 
 MONGO_HOST = settings.mongo_host

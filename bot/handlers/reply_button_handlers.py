@@ -20,6 +20,7 @@ class ButtonHandlerStates(StatesGroup):
     providing_new_email = State()
     clicked_check_for_plagiarism = State()
 
+
 class ButtonHandlerRouter(Router):
     def __init__(
         self,
@@ -78,17 +79,20 @@ class ButtonHandlerRouter(Router):
         :return: None
         """
         user_id = message.from_user.id
-        user_role = self.mongo_client.get_user_data(user_id).get("role")
-        await message.answer(
-            f"Please see the list of available links",
-            reply_markup=inline_buttons.generate_all_link_markup(user_role),
-        )
-        await state.set_state(ButtonHandlerStates.clicked_all_links)
+        try:
+            user_role = self.mongo_client.get_user_data(user_id).get("role")
+            await message.answer(
+                f"Please see the list of available links",
+                reply_markup=inline_buttons.generate_all_link_markup(user_role),
+            )
+            await state.set_state(ButtonHandlerStates.clicked_all_links)
+        except AttributeError:
+            await message.answer(f"Error while receiving your role. Please check that you are registered user")
 
     @staticmethod
     async def handle_all_links_inline_button(call: CallbackQuery) -> None:
         """
-        Retrieves the table name from callback and sends it to user with the  appropriate link
+        Retrieves the table name from callback and sends it to user with the appropriate link
 
         :param call: Call from markup
         :return: None
@@ -108,11 +112,17 @@ class ButtonHandlerRouter(Router):
         :param state: Current state of user
         :return: None
         """
-        await message.answer(
-            f"Please provide links to open access.\n\n"
-            f"Please note that links should be google documents"
-        )
-        await state.set_state(ButtonHandlerStates.clicked_open_access)
+        user_id = message.from_user.id
+        try:
+            self.mongo_client.get_user_data(user_id).get("username")
+            await message.answer(
+                f"Please provide links to open access.\n\n"
+                f"Please note that links should be google documents"
+            )
+            await state.set_state(ButtonHandlerStates.clicked_open_access)
+        except AttributeError:
+            await message.answer(f"Error while receiving your username.\n\n"
+                                 f"Please check that you are registered user")
 
     async def open_access(self, message: Message, state: FSMContext) -> None:
         """
@@ -127,7 +137,7 @@ class ButtonHandlerRouter(Router):
         user_id = message.from_user.id
         links = message.text
         list_of_links = re.split(r"[ ,\n]+", links)
-        userdata = self.mongo_client.get_user_data(user_id) #TODO wrap attributeerror in open access
+        userdata = self.mongo_client.get_user_data(user_id)
         email = userdata.get("email")
         valid_links = [
             link
@@ -158,14 +168,18 @@ class ButtonHandlerRouter(Router):
         :return: None
         """
         user_id = message.from_user.id
-        userdata = self.mongo_client.get_user_data(user_id)
-        email = userdata.get("email")
-        await message.answer(
-            f"Your current email is: {email}\n\n"
-            f"Are you sure you want to change it?",
-            reply_markup=inline_buttons.generate_confirmation_markup(user_id),
-        )
-        await state.set_state(ButtonHandlerStates.clicked_change_email)
+        try:
+            userdata = self.mongo_client.get_user_data(user_id)
+            email = userdata.get("email")
+            await message.answer(
+                f"Your current email is: {email}\n\n"
+                f"Are you sure you want to change it?",
+                reply_markup=inline_buttons.generate_confirmation_markup(user_id),
+            )
+            await state.set_state(ButtonHandlerStates.clicked_change_email)
+        except AttributeError as error:
+            await message.answer(f"Error while getting your email.\n\n"
+                                 f"Please check that you are registered user")
 
     async def handle_deny_change_email(
         self, call: CallbackQuery, state: FSMContext

@@ -9,5 +9,10 @@ class MissingEnvironmentVariableException(Exception):
 
 
 class _BaseException(Exception):
+    CODE = "BASE_ERROR"
+
     def __init__(self, message: str):
         self.message = message
+
+    def get_response(self):
+        return {'message': self.message, "code": self.CODE}

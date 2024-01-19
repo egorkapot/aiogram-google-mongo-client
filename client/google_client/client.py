@@ -23,10 +23,8 @@ SCOPES = [
 ]
 
 
-# TODO create instance inside module
 class GoogleClientException(_BaseException):
-    pass
-    # TODO only pass?
+    CODE = "GOOGLE_CLIENT_ERROR"
 
 
 class GoogleClient:
