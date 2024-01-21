@@ -43,8 +43,8 @@ class RegistrationRouter(Router):
         self.message.register(
             self.email_is_not_valid, RegistrationStates.awaiting_for_email
         )
-        self.callback_query.register(self.handle_approve, F.data.startswith("approve_"))
-        self.callback_query.register(self.handle_deny, F.data.startswith("deny_"))
+        self.callback_query.register(self.handle_approve, F.data.startswith("registration_approve_"))
+        self.callback_query.register(self.handle_deny, F.data.startswith("registration_deny_"))
         self.callback_query.register(self.handle_role, F.data.startswith("role_"))
 
     async def cmd_start(self, message: Message, state: FSMContext):
@@ -120,7 +120,7 @@ class RegistrationRouter(Router):
             f"email: {message.text}\n"
             f"Wants to register. Approve?",
             reply_markup=inline_buttons.generate_confirmation_markup(
-                message.from_user.id
+                "registration", message.from_user.id
             ),
         )
         await state.clear()

@@ -140,15 +140,16 @@ class InlineButtons:
         return InlineKeyboardMarkup(inline_keyboard=markup)
 
     @staticmethod
-    def generate_confirmation_markup(user_id: int) -> InlineKeyboardMarkup:
+    def generate_confirmation_markup(context: str, user_id: int) -> InlineKeyboardMarkup:
         """
         Generates the markup for author with the callback buttons where to accept the registration or not
 
+        :param context: String with context dedicated to diversify the callbacks using filtering
         :param user_id: ID of user to send to callback handler
         :return: Markup of keyboard buttons
         """
-        _yes = InlineKeyboardButton(text="✅", callback_data=f"approve_{user_id}")
-        _no = InlineKeyboardButton(text="⛔", callback_data=f"deny_{user_id}")
+        _yes = InlineKeyboardButton(text="✅", callback_data=f"{context}_approve_{user_id}")
+        _no = InlineKeyboardButton(text="⛔", callback_data=f"{context}_deny_{user_id}")
         confirmation_markup = InlineKeyboardMarkup(inline_keyboard=[[_yes, _no]])
         return confirmation_markup
 

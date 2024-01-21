@@ -53,12 +53,12 @@ class ButtonHandlerRouter(Router):
         self.callback_query.register(
             self.handle_deny_change_email,
             ButtonHandlerStates.clicked_change_email,
-            F.data.startswith("deny_"),
+            F.data.startswith("change_email_deny_"),
         )
         self.callback_query.register(
             self.handle_approve_change_email,
             ButtonHandlerStates.clicked_change_email,
-            F.data.startswith("approve_"),
+            F.data.startswith("change_email_approve_"),
         )
         self.message.register(
             self.update_with_new_email, ButtonHandlerStates.providing_new_email
@@ -174,7 +174,7 @@ class ButtonHandlerRouter(Router):
             await message.answer(
                 f"Your current email is: {email}\n\n"
                 f"Are you sure you want to change it?",
-                reply_markup=inline_buttons.generate_confirmation_markup(user_id),
+                reply_markup=inline_buttons.generate_confirmation_markup("change_email", user_id),
             )
             await state.set_state(ButtonHandlerStates.clicked_change_email)
         except AttributeError as error:
