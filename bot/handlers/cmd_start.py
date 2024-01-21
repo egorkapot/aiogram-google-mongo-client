@@ -132,7 +132,7 @@ class RegistrationRouter(Router):
         :param call: Call from markup
         :return: None
         """
-        user_id_ = int(call.data.split("_")[1])
+        user_id_ = int(call.data.split("_")[2])
         await call.message.edit_text(
             "Please set the role to user",
             reply_markup=inline_buttons.generate_user_role(user_id_),
@@ -147,7 +147,7 @@ class RegistrationRouter(Router):
         :param call: Call from markup
         :return: None
         """
-        user_id_ = int(call.data.split("_")[1])
+        user_id_ = int(call.data.split("_")[2])
         username = self.mongo_client.get_username(user_id_)
         await call.message.edit_text(
             f"You have denied the registration for user: {username}",
@@ -178,12 +178,13 @@ class RegistrationRouter(Router):
             "You have been registered! Please see the available options",
             reply_markup=reply_buttons.create_initial_markup(role_),
         )
-        try:
-            chat_invite_link = await self.bot.export_chat_invite_link(
-                chat_id=settings.web_content_chat_id
-            )
-            await self.bot.send_message(
-                user_id_, text=f"Your invite link: {chat_invite_link}"
-            )
-        except TelegramBadRequest as error:
-            self.logger.error(f"Error while sending invite link {error}")
+        if role_ != "biggiko":
+            try:
+                chat_invite_link = await self.bot.export_chat_invite_link(
+                    chat_id=settings.web_content_chat_id
+                )
+                await self.bot.send_message(
+                    user_id_, text=f"Your invite link: {chat_invite_link}"
+                )
+            except TelegramBadRequest as error:
+                self.logger.error(f"Error while sending invite link {error}")
