@@ -46,6 +46,8 @@ class Settings(BaseSettings):
     mongo_port: int = Field(27017, env="MONGO_PORT")
     duplicheker_token: str = Field(None, env="DUPLICHEKER_TOKEN")
     web_content_chat_id: str = Field(None, env="WEB_CONTENT_CHAT_ID")
+    mongo_username: str = Field(None, env="MONGO_USERNAME")
+    mongo_password: str = Field(None, env="MONGO_PASSWORD")
 
     def get_bot_token(self):
         if self.tier == "production":

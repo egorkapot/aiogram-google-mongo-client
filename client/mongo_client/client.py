@@ -26,9 +26,11 @@ class MongoUsersClient:
         chat_id: str | int,
         host: str,
         port: int | None,
+        _username: str | None,
+        _password: str | None,
         database_name: str,
     ):
-        self.client = MongoClient(host, port)
+        self.client = MongoClient(host, port, username=_username, password=_password, authSource=database_name)
         self.db = self.client[database_name]
         self.initialize_user_collection()
         self.users_collection = self.db.users
@@ -152,5 +154,8 @@ class MongoUsersClient:
 
 MONGO_HOST = settings.mongo_host
 MONGO_PORT = settings.mongo_port
+_username = settings.mongo_username
+_password = settings.mongo_password
 author_chat_id = settings.author_chat_id
-mongo_client = MongoUsersClient(bot, author_chat_id, MONGO_HOST, MONGO_PORT, "db")
+mongo_client = MongoUsersClient(bot, author_chat_id, MONGO_HOST, MONGO_PORT, _username, _password, "db")
+

@@ -15,9 +15,15 @@ services:
   mongo:
     image: "mongo"
     container_name: mongo_db
+    environment:
+      #Use these credentials to initialize root user to enable -auth automatically
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASS}
     ports:
       - "27017:27017"
     volumes:
       - mongodata:/data/db
+      - mongoconfig:/etc/mongod.conf
 volumes:
   mongodata:
+  mongoconfig:
