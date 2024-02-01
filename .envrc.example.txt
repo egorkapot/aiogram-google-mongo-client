@@ -12,4 +12,5 @@ MONGO_PORT=#Port for MongoDB. Default value is 27017
 VALIDATION_SCHEMA_PATH=#Path for validation schema
 DUPLICHEKER_TOKEN=#Token for plagiarism
 WEB_CONTENT_CHAT_ID=#Chat ID of telegram group
-
+MONGO_USERNAME=#username to auth to mongo
+MONGO_PASSWORD=#password to auth to mongo
