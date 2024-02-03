@@ -23,7 +23,8 @@ services:
       - "27017:27017"
     volumes:
       - mongodata:/data/db
-      - mongoconfig:/etc/mongod.conf
+      - "./mongo_client/mongo_init/mongo_init_user.js:/docker-entrypoint-initdb.d/mongo_init_user.js"
+
 volumes:
   mongodata:
-  mongoconfig:
+
