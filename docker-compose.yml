@@ -18,8 +18,8 @@ services:
     env_file: ./.env
     environment:
       #Use these credentials to initialize root user to enable -auth automatically
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASS}
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=egorkapot
     ports:
       - "27017:27017"
     volumes:
