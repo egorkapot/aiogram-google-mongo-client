@@ -22,6 +22,10 @@ jobs:
         BACKUP_TABLE_LINK: ${{ secrets.BACKUP_TABLE_LINK }}
         DUPLICHEKER_TOKEN: ${{ secrets.DUPLICHEKER_TOKEN }}
         WEB_CONTENT_CHAT_ID: ${{ secrets.WEB_CONTENT_CHAT_ID }}
+        MONGO_ROOT_USER: ${{ secrets.MONGO_ROOT_USER }}
+        MONGO_ROOT_PASS: ${{ secrets.MONGO_ROOT_PASS }}
+        MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
+        MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
       with:
         host: ${{ secrets.KAMATERA_SERVER_IP }}
         username: ${{ secrets.KAMATERA_USERNAME }}
