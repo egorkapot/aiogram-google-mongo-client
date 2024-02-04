@@ -1,0 +1,3 @@
+echo "Printing variables for docker"
+echo "MONGO_INITDB_ROOT_USERNAME=$MONGO_ROOT_USER"
+echo "MONGO_INITDB_ROOT_PASSWORD=$MONGO_ROOT_PASS"

@@ -49,8 +49,4 @@ MONGO_USERNAME=$MONGO_USERNAME
 MONGO_PASSWORD=$MONGO_PASSWORD
 EOF
 
-echo "MongoDB Root User: $MONGO_ROOT_USER"
-echo "MongoDB Root Password: $MONGO_ROOT_PASS"
-echo "MongoDB Username: $MONGO_USERNAME"
-echo "MongoDB Password: $MONGO_PASSWORD"
 docker-compose up --build -d
