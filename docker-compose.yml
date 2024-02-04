@@ -3,7 +3,7 @@ version: '3'
 services:
   bot:
     build: .
-    env_file: /root/bot/aiogram-google-mongo-client/.env
+    env_file: ./.env
     image: telegram_access_bot:latest
     container_name: telegram_bot
     depends_on:
@@ -15,6 +15,7 @@ services:
   mongo:
     image: "mongo"
     container_name: mongo_db
+    env_file: ./.env
     environment:
       #Use these credentials to initialize root user to enable -auth automatically
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER}
