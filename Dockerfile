@@ -5,7 +5,7 @@ FROM python:3.10-slim
 WORKDIR /app
 
 COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --default-timeout=1000 --no-cache-dir -v -v -v -r requirements.txt
 COPY . /app
 
 # Run main.py when the container launches
