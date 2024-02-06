@@ -20,11 +20,12 @@ services:
       #Use these credentials to initialize root user to enable -auth automatically
       - MONGO_INITDB_ROOT_USERNAME=$MONGO_INITDB_ROOT_USERNAME
       - MONGO_INITDB_ROOT_PASSWORD=$MONGO_INITDB_ROOT_PASSWORD
-      - MONGO_INITDB_DATABASE=admin
     ports:
       - "27017:27017"
     volumes:
       - mongodata:/data/db
+      - ./client/mongo_client/mongo_init/mongo-init.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro
+
 
 volumes:
   mongodata:
